@@ -1,8 +1,35 @@
-import { Card, Layout, Space, Form, Input, Checkbox, Button, Flex } from "antd";
+import {
+	Layout,
+	Card,
+	Space,
+	Form,
+	Input,
+	Checkbox,
+	Button,
+	Flex,
+	Alert,
+} from "antd";
 import { LockFilled, UserOutlined, LockOutlined } from "@ant-design/icons";
 import Logo from "../../components/icons/Logo";
+import { useMutation } from "@tanstack/react-query";
+import { Credentials } from "../../types";
+import { login } from "../../http/api";
+
+const loginUser = async (credentials: Credentials) => {
+	// server call logic
+	const { data } = await login(credentials);
+	return data;
+};
 
 const LoginPage = () => {
+	const { mutate, isPending, isError, error } = useMutation({
+		mutationKey: ["login"],
+		mutationFn: loginUser,
+		onSuccess: async () => {
+			console.log("Login successful.");
+		},
+	});
+
 	return (
 		<>
 			<Layout
@@ -29,22 +56,33 @@ const LoginPage = () => {
 									justifyContent: "center",
 								}}
 							>
-								<LockFilled /> Sign in
+								<LockFilled />
+								Sign in
 							</Space>
 						}
 					>
 						<Form
-							initialValues={{ remember: true }}
+							initialValues={{
+								remember: true,
+							}}
 							onFinish={(values) => {
+								mutate({ email: values.username, password: values.password });
 								console.log(values);
 							}}
 						>
+							{isError && (
+								<Alert
+									style={{ marginBottom: 24 }}
+									type="error"
+									message={error?.message}
+								/>
+							)}
 							<Form.Item
-								name="userName"
+								name="username"
 								rules={[
 									{
 										required: true,
-										message: "Please enter your username",
+										message: "Please input your Username",
 									},
 									{
 										type: "email",
@@ -52,14 +90,14 @@ const LoginPage = () => {
 									},
 								]}
 							>
-								<Input prefix={<UserOutlined />} placeholder="UserName" />
+								<Input prefix={<UserOutlined />} placeholder="Username" />
 							</Form.Item>
 							<Form.Item
 								name="password"
 								rules={[
 									{
 										required: true,
-										message: "Please enter your Password",
+										message: "Please input your password",
 									},
 								]}
 							>
@@ -72,8 +110,8 @@ const LoginPage = () => {
 								<Form.Item name="remember" valuePropName="checked">
 									<Checkbox>Remember me</Checkbox>
 								</Form.Item>
-								<a id="login-form-forgot" href="#">
-									Forgot Password
+								<a href="" id="login-form-forgot">
+									Forgot password
 								</a>
 							</Flex>
 							<Form.Item>
@@ -81,6 +119,7 @@ const LoginPage = () => {
 									type="primary"
 									htmlType="submit"
 									style={{ width: "100%" }}
+									loading={isPending}
 								>
 									Log in
 								</Button>

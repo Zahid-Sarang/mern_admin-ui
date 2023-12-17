@@ -9,7 +9,7 @@ describe("Login Page", () => {
 		// findBy -> Async
 		// queryBy -> null
 		expect(screen.getByText(/Sign in/)).toBeInTheDocument();
-		expect(screen.getByPlaceholderText("UserName")).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
 		expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
 		expect(

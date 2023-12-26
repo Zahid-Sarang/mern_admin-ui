@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { it, describe, expect } from "vitest";
-import LoginPage from "./login";
+import LoginPage from "./Login";
 
 describe("Login Page", () => {
 	it("should render with required fields", () => {

@@ -24,39 +24,42 @@ import { logout } from "../http/api";
 
 const { Sider, Header, Content, Footer } = Layout;
 
+const menuItemsConfig = [
+	{
+		key: "/",
+		icon: <Icon component={Home} />,
+		label: <NavLink to="/">Home</NavLink>,
+	},
+	{
+		key: "/users",
+		icon: <Icon component={UserIcon} />,
+		label: <NavLink to="/users">Users</NavLink>,
+		roles: ["admin"],
+	},
+	{
+		key: "/restaurants",
+		icon: <Icon component={foodIcon} />,
+		label: <NavLink to="/restaurants">Restaurants</NavLink>,
+		roles: ["admin"],
+	},
+	{
+		key: "/products",
+		icon: <Icon component={BasketIcon} />,
+		label: <NavLink to="/products">Products</NavLink>,
+	},
+	{
+		key: "/promos",
+		icon: <Icon component={GiftIcon} />,
+		label: <NavLink to="/promos">Promos</NavLink>,
+	},
+];
+
 const getMenuItems = (role: string) => {
-	const baseItem = [
-		{
-			key: "/",
-			icon: <Icon component={Home} />,
-			label: <NavLink to="/">Home</NavLink>,
-		},
-		{
-			key: "/restaurants",
-			icon: <Icon component={foodIcon} />,
-			label: <NavLink to="/restaurants">Restaurants</NavLink>,
-		},
-		{
-			key: "/products",
-			icon: <Icon component={BasketIcon} />,
-			label: <NavLink to="/products">Products</NavLink>,
-		},
-		{
-			key: "/promos",
-			icon: <Icon component={GiftIcon} />,
-			label: <NavLink to="/promos">Promos</NavLink>,
-		},
-	];
-	if (role === "admin") {
-		const menus = [...baseItem];
-		menus.splice(1, 0, {
-			key: "/users",
-			icon: <Icon component={UserIcon} />,
-			label: <NavLink to="/users">Users</NavLink>,
-		});
-		return menus;
-	}
-	return baseItem;
+	const filteredMenuItems = menuItemsConfig.filter((item) => {
+		return !item.roles || item.roles.includes(role);
+	});
+
+	return filteredMenuItems;
 };
 
 const Dashboard = () => {

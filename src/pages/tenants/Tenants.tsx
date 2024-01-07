@@ -2,11 +2,12 @@ import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
 import { RightOutlined, PlusOutlined } from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers } from "../../http/api";
-import { User } from "../../types";
-import { useAuthStore } from "../../store";
-import UsersFilter from "./UsersFilter";
+import { getTenants } from "../../http/api";
+
+import TenantsFilter from "./TenantFilter";
+
 import { useState } from "react";
+import { useAuthStore } from "../../store";
 
 const columns = [
 	{
@@ -16,29 +17,22 @@ const columns = [
 	},
 	{
 		title: "Name",
-		dataIndex: "firstName",
-		key: "firstName",
-		render: (_text: string, record: User) => {
-			return (
-				<div>
-					{record.firstName} {record.lastName}
-				</div>
-			);
-		},
+		dataIndex: "name",
+		key: "name",
 	},
 	{
-		title: "Email",
-		dataIndex: "email",
+		title: "Address",
+		dataIndex: "address",
 		key: "email",
 	},
 	{
-		title: "Role",
-		dataIndex: "role",
-		key: "role",
+		title: "Manager",
+		dataIndex: "manger",
+		key: "manger",
 	},
 ];
 
-const Users = () => {
+const Tenants = () => {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const { user } = useAuthStore();
 	if (user?.role === "manager") {
@@ -50,9 +44,9 @@ const Users = () => {
 		isError,
 		error,
 	} = useQuery({
-		queryKey: ["users"],
+		queryKey: ["tenants"],
 		queryFn: () => {
-			return getUsers().then((res) => res.data);
+			return getTenants().then((res) => res.data);
 		},
 	});
 
@@ -66,13 +60,13 @@ const Users = () => {
 							title: <Link to="/">Dashboard</Link>,
 						},
 						{
-							title: "Users",
+							title: "Restaurants",
 						},
 					]}
 				/>
 				{isLoading && <div>Loading...</div>}
 				{isError && <div>{error.message}</div>}
-				<UsersFilter
+				<TenantsFilter
 					onFilterChange={(filterName: string, filterValue: string) => {
 						console.log(filterName, filterValue);
 					}}
@@ -82,14 +76,15 @@ const Users = () => {
 						icon={<PlusOutlined />}
 						onClick={() => setDrawerOpen(true)}
 					>
-						Create User
+						Create Restaurants
 					</Button>
-				</UsersFilter>
+				</TenantsFilter>
+
 				<Table columns={columns} dataSource={users} rowKey={"id"} />
 
 				{/* Drawer */}
 				<Drawer
-					title="Create User"
+					title="Create Tenants"
 					open={drawerOpen}
 					width={720}
 					destroyOnClose={true}
@@ -108,4 +103,4 @@ const Users = () => {
 	);
 };
 
-export default Users;
+export default Tenants;

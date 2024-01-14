@@ -1,4 +1,4 @@
-import { Card, Col, Input, Row, Select } from "antd";
+import { Card, Col, Input, Row } from "antd";
 
 import * as React from "react";
 
@@ -14,7 +14,7 @@ const TetnantsFilter = ({ onFilterChange, children }: TenatsFilterProps) => {
 				<Row justify="space-between">
 					<Col span={16}>
 						<Row gutter={20}>
-							<Col span={8}>
+							<Col span={12}>
 								<Input.Search
 									allowClear={true}
 									placeholder="Search"
@@ -22,19 +22,6 @@ const TetnantsFilter = ({ onFilterChange, children }: TenatsFilterProps) => {
 										onFilterChange("UserSearchQuery", e.target.value)
 									}
 								/>
-							</Col>
-							<Col span={8}>
-								<Select
-									style={{ width: "100%" }}
-									placeholder="Select status"
-									allowClear={true}
-									onChange={(selectedItem) =>
-										onFilterChange("statusFilter", selectedItem)
-									}
-								>
-									<Select.Option value="ban">Ban</Select.Option>
-									<Select.Option value="active">Active</Select.Option>
-								</Select>
 							</Col>
 						</Row>
 					</Col>

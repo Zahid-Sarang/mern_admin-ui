@@ -23,12 +23,7 @@ const columns = [
 	{
 		title: "Address",
 		dataIndex: "address",
-		key: "email",
-	},
-	{
-		title: "Manager",
-		dataIndex: "manger",
-		key: "manger",
+		key: "address",
 	},
 ];
 
@@ -39,14 +34,15 @@ const Tenants = () => {
 		return <Navigate to="/" replace={true} />;
 	}
 	const {
-		data: users,
+		data: tenants,
 		isLoading,
 		isError,
 		error,
 	} = useQuery({
 		queryKey: ["tenants"],
-		queryFn: () => {
-			return getTenants().then((res) => res.data);
+		queryFn: async () => {
+			const res = await getTenants();
+			return res.data;
 		},
 	});
 
@@ -80,7 +76,7 @@ const Tenants = () => {
 					</Button>
 				</TenantsFilter>
 
-				<Table columns={columns} dataSource={users} rowKey={"id"} />
+				<Table columns={columns} dataSource={tenants} rowKey={"id"} />
 
 				{/* Drawer */}
 				<Drawer

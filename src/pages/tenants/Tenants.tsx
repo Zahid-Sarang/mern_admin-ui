@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
+import { Breadcrumb, Button, Drawer, Form, Space, Table } from "antd";
 import { RightOutlined, PlusOutlined } from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import TenantsFilter from "./TenantFilter";
 
 import { useState } from "react";
 import { useAuthStore } from "../../store";
+import TenantForm from "./forms/TenantForms";
 
 const columns = [
 	{
@@ -28,6 +29,7 @@ const columns = [
 ];
 
 const Tenants = () => {
+	const [form] = Form.useForm();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const { user } = useAuthStore();
 	if (user?.role === "manager") {
@@ -93,7 +95,11 @@ const Tenants = () => {
 							<Button type="primary">Save</Button>
 						</Space>
 					}
-				></Drawer>
+				>
+					<Form layout="vertical" form={form}>
+						<TenantForm />
+					</Form>
+				</Drawer>
 			</Space>
 		</>
 	);

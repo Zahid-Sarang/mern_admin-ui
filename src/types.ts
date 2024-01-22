@@ -26,3 +26,8 @@ export type Tenant = {
 	address: string;
 	name: string;
 };
+
+export type FiledData = {
+	name: string;
+	value?: string;
+};

@@ -32,7 +32,7 @@ const UsersFilter = ({ children }: UsersFilterProps) => {
 									</Select>
 								</Form.Item>
 							</Col>
-							<Col span={8}>
+							{/* <Col span={8}>
 								<Select
 									style={{ width: "100%" }}
 									placeholder="Select status"
@@ -41,7 +41,7 @@ const UsersFilter = ({ children }: UsersFilterProps) => {
 									<Select.Option value="ban">Ban</Select.Option>
 									<Select.Option value="active">Active</Select.Option>
 								</Select>
-							</Col>
+							</Col> */}
 						</Row>
 					</Col>
 					<Col span={8} style={{ display: "flex", justifyContent: "end" }}>

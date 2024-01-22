@@ -26,9 +26,11 @@ import { createUser, getUsers } from "../../http/api";
 import { User, CreateUserData, FiledData } from "../../types";
 import { useAuthStore } from "../../store";
 import UsersFilter from "./UsersFilter";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import UserForm from "./forms/UserForm";
 import { PER_PAGE } from "../../constants";
+import { debounce } from "lodash";
+import { preview } from "vite";
 
 const columns = [
 	{
@@ -115,16 +117,29 @@ const Users = () => {
 		setDrawerOpen(false);
 	};
 
+	// debouncing
+	const debouncedQUpdate = useMemo(() => {
+		return debounce((value: string | undefined) => {
+			setQueryParams((prev) => ({ ...prev, q: value }));
+		}, 1000);
+	}, []);
+
+	// filter Function
 	const onFilterChange = (changedFields: FiledData[]) => {
 		const changedFilterFields = changedFields
 			.map((item) => ({
 				[item.name[0]]: item.value,
 			}))
 			.reduce((acc, item) => ({ ...acc, ...item }), {});
-		setQueryParams((prev) => ({
-			...prev,
-			...changedFilterFields,
-		}));
+
+		if ("q" in changedFilterFields) {
+			debouncedQUpdate(changedFilterFields.q);
+		} else {
+			setQueryParams((prev) => ({
+				...prev,
+				...changedFilterFields,
+			}));
+		}
 	};
 
 	return (

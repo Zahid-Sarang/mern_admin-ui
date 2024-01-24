@@ -1,13 +1,12 @@
-import { Card, Col, Input, Row } from "antd";
+import { Card, Col, Form, Input, Row } from "antd";
 
 import * as React from "react";
 
 type TenatsFilterProps = {
 	children?: React.ReactNode;
-	onFilterChange: (filterName: string, filterValue: string) => void;
 };
 
-const TetnantsFilter = ({ onFilterChange, children }: TenatsFilterProps) => {
+const TetnantsFilter = ({ children }: TenatsFilterProps) => {
 	return (
 		<>
 			<Card>
@@ -15,13 +14,9 @@ const TetnantsFilter = ({ onFilterChange, children }: TenatsFilterProps) => {
 					<Col span={16}>
 						<Row gutter={20}>
 							<Col span={12}>
-								<Input.Search
-									allowClear={true}
-									placeholder="Search"
-									onChange={(e) =>
-										onFilterChange("UserSearchQuery", e.target.value)
-									}
-								/>
+								<Form.Item name="q">
+									<Input.Search allowClear={true} placeholder="Search" />
+								</Form.Item>
 							</Col>
 						</Row>
 					</Col>

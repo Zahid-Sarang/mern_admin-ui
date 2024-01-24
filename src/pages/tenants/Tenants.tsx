@@ -1,15 +1,37 @@
-import { Breadcrumb, Button, Drawer, Form, Space, Table, theme } from "antd";
-import { RightOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+	Breadcrumb,
+	Button,
+	Drawer,
+	Flex,
+	Form,
+	Space,
+	Spin,
+	Table,
+	theme,
+	Typography,
+} from "antd";
+import {
+	RightOutlined,
+	PlusOutlined,
+	LoadingOutlined,
+} from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { createTenant, getTenants } from "../../http/api";
 
 import TenantsFilter from "./TenantFilter";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuthStore } from "../../store";
 import TenantForm from "./forms/TenantForms";
-import { Tenant } from "../../types";
+import { FiledData, Tenant } from "../../types";
+import { TENANT_PER_PAGE } from "../../constants";
+import { debounce } from "lodash";
 
 const columns = [
 	{
@@ -30,10 +52,15 @@ const columns = [
 ];
 
 const Tenants = () => {
+	const [form] = Form.useForm();
+	const [filterForm] = Form.useForm();
+	const [queryParams, setQueryParams] = useState({
+		perPage: TENANT_PER_PAGE,
+		currentPage: 1,
+	});
 	const {
 		token: { colorBgLayout },
 	} = theme.useToken();
-	const [form] = Form.useForm();
 	const queryClient = useQueryClient();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const { user } = useAuthStore();
@@ -42,15 +69,22 @@ const Tenants = () => {
 	}
 	const {
 		data: tenants,
-		isLoading,
+		isFetching,
 		isError,
 		error,
 	} = useQuery({
-		queryKey: ["tenants"],
-		queryFn: async () => {
-			const res = await getTenants();
-			return res.data;
+		queryKey: ["tenants", queryParams],
+		queryFn: () => {
+			const filterParams = Object.fromEntries(
+				Object.entries(queryParams).filter((item) => !!item[1])
+			);
+
+			const queryString = new URLSearchParams(
+				filterParams as unknown as Record<string, string>
+			).toString();
+			return getTenants(queryString).then((res) => res.data);
 		},
+		placeholderData: keepPreviousData,
 	});
 
 	const { mutate: tenantMutate } = useMutation({
@@ -70,37 +104,85 @@ const Tenants = () => {
 		setDrawerOpen(false);
 	};
 
+	// debouncing
+	const debouncedQUpdate = useMemo(() => {
+		return debounce((value: string | undefined) => {
+			setQueryParams((prev) => ({ ...prev, q: value }));
+		}, 1000);
+	}, []);
+
+	// filter Function
+	const onFilterChange = (changedFields: FiledData[]) => {
+		console.log(changedFields);
+		const changedFilterFields = changedFields
+			.map((item) => ({
+				[item.name[0]]: item.value,
+			}))
+			.reduce((acc, item) => ({ ...acc, ...item }), {});
+		if ("q" in changedFilterFields) {
+			debouncedQUpdate(changedFilterFields.q);
+		} else {
+			setQueryParams((prev) => ({
+				...prev,
+				...changedFilterFields,
+			}));
+		}
+	};
+
 	return (
 		<>
 			<Space direction="vertical" style={{ width: "100%" }} size="large">
-				<Breadcrumb
-					separator={<RightOutlined />}
-					items={[
-						{
-							title: <Link to="/">Dashboard</Link>,
-						},
-						{
-							title: "Restaurants",
-						},
-					]}
-				/>
-				{isLoading && <div>Loading...</div>}
-				{isError && <div>{error.message}</div>}
-				<TenantsFilter
-					onFilterChange={(filterName: string, filterValue: string) => {
-						console.log(filterName, filterValue);
-					}}
-				>
-					<Button
-						type="primary"
-						icon={<PlusOutlined />}
-						onClick={() => setDrawerOpen(true)}
-					>
-						Create Restaurants
-					</Button>
-				</TenantsFilter>
+				<Flex justify="space-between">
+					<Breadcrumb
+						separator={<RightOutlined />}
+						items={[
+							{
+								title: <Link to="/">Dashboard</Link>,
+							},
+							{
+								title: "Restaurants",
+							},
+						]}
+					/>
+					{isFetching && (
+						<Spin
+							indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}
+						/>
+					)}
+					{isError && (
+						<Typography.Text type="danger">{error.message}</Typography.Text>
+					)}
+				</Flex>
+				<Form form={filterForm} onFieldsChange={onFilterChange}>
+					<TenantsFilter>
+						<Button
+							type="primary"
+							icon={<PlusOutlined />}
+							onClick={() => setDrawerOpen(true)}
+						>
+							Create Restaurants
+						</Button>
+					</TenantsFilter>
+				</Form>
 
-				<Table columns={columns} dataSource={tenants} rowKey={"id"} />
+				<Table
+					columns={columns}
+					dataSource={tenants?.data}
+					rowKey={"id"}
+					pagination={{
+						total: tenants?.total,
+						pageSize: queryParams.perPage,
+						current: queryParams.currentPage,
+						onChange: (page, pageSize) => {
+							setQueryParams((prev) => {
+								return {
+									...prev,
+									currentPage: page,
+								};
+							});
+						},
+					}}
+				/>
 
 				{/* Drawer */}
 				<Drawer

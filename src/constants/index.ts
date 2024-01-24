@@ -4,4 +4,5 @@ export const getSelf = async () => {
 	return data;
 };
 
-export const PER_PAGE = 8;
+export const USER_PER_PAGE = 8;
+export const TENANT_PER_PAGE = 6;

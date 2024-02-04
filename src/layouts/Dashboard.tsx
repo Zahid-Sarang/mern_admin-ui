@@ -81,7 +81,7 @@ const Dashboard = () => {
 	if (user === null) {
 		return (
 			<Navigate
-				to={`/auth/login?returnTo=${location.pathname }`}
+				to={`/auth/login?returnTo=${location.pathname}`}
 				replace={true}
 			/>
 		);
@@ -102,7 +102,7 @@ const Dashboard = () => {
 					</div>
 					<Menu
 						theme="light"
-						defaultSelectedKeys={["/"]}
+						defaultSelectedKeys={[`${location.pathname}`]}
 						mode="inline"
 						items={items}
 					/>

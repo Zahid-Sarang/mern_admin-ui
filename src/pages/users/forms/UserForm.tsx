@@ -7,8 +7,7 @@ const UserForm = () => {
 	const { data: tenants } = useQuery({
 		queryKey: ["tenants"],
 		queryFn: async () => {
-			const res = await getTenants();
-			return res.data;
+			return getTenants(`perPage=100&currentPage=1`).then((res) => res.data);
 		},
 	});
 	return (
@@ -134,7 +133,7 @@ const UserForm = () => {
 											allowClear={true}
 											onChange={() => {}}
 										>
-											{tenants?.map((tenants: Tenant) => (
+											{tenants?.data.map((tenants: Tenant) => (
 												<Select.Option value={tenants.id} key={tenants.id}>
 													{tenants.name}
 												</Select.Option>

@@ -26,7 +26,7 @@ import { createUser, getUsers } from "../../http/api";
 import { User, CreateUserData, FiledData } from "../../types";
 import { useAuthStore } from "../../store";
 import UsersFilter from "./UsersFilter";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import UserForm from "./forms/UserForm";
 import { USER_PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
@@ -72,7 +72,11 @@ const columns = [
 const Users = () => {
 	const [form] = Form.useForm();
 	const [filterForm] = Form.useForm();
+	const { user } = useAuthStore();
 	const queryClient = useQueryClient();
+	const [currentEditingUser, setCurrentEditingUser] = useState<User | null>(
+		null
+	);
 	const {
 		token: { colorBgLayout },
 	} = theme.useToken();
@@ -83,10 +87,16 @@ const Users = () => {
 	});
 
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const { user } = useAuthStore();
 	if (user?.role === "manager") {
 		return <Navigate to="/" replace={true} />;
 	}
+
+	useEffect(() => {
+		if (currentEditingUser) {
+			setDrawerOpen(true);
+		}
+	}, [currentEditingUser]);
+
 	const {
 		data: users,
 		isFetching,
@@ -186,7 +196,26 @@ const Users = () => {
 					</UsersFilter>
 				</Form>
 				<Table
-					columns={columns}
+					columns={[
+						...columns,
+						{
+							title: "Actions",
+							render: (_: string, record: User) => {
+								return (
+									<Space>
+										<Button
+											type="link"
+											onClick={() => {
+												setCurrentEditingUser(record);
+											}}
+										>
+											Edit
+										</Button>
+									</Space>
+								);
+							},
+						},
+					]}
 					dataSource={users?.data}
 					rowKey={"id"}
 					pagination={{
@@ -201,9 +230,9 @@ const Users = () => {
 								};
 							});
 						},
-						showTotal:(total:number,range:number[]) => {
+						showTotal: (total: number, range: number[]) => {
 							return `Showing ${range[0]} - ${range[1]} of ${total} items`;
-						}
+						},
 					}}
 				/>
 

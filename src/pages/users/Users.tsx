@@ -22,7 +22,7 @@ import {
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { createUser, getUsers } from "../../http/api";
+import { createUser, getUsers, updateUser } from "../../http/api";
 import { User, CreateUserData, FiledData } from "../../types";
 import { useAuthStore } from "../../store";
 import UsersFilter from "./UsersFilter";
@@ -94,8 +94,12 @@ const Users = () => {
 	useEffect(() => {
 		if (currentEditingUser) {
 			setDrawerOpen(true);
+			form.setFieldsValue({
+				...currentEditingUser,
+				tenantId: currentEditingUser.tenant?.id,
+			});
 		}
-	}, [currentEditingUser]);
+	}, [currentEditingUser, form]);
 
 	const {
 		data: users,
@@ -127,10 +131,26 @@ const Users = () => {
 		},
 	});
 
+	const { mutate: updateUserMutate } = useMutation({
+		mutationKey: ["Update-user"],
+		mutationFn: async (data: CreateUserData) =>
+			updateUser(data, currentEditingUser!.id).then((res) => res.data),
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			return;
+		},
+	});
+
 	const onHandleSubmit = async () => {
 		await form.validateFields();
-		userMutate(form.getFieldsValue());
+		const isEditMode = !!currentEditingUser;
+		if (isEditMode) {
+			await updateUserMutate(form.getFieldsValue());
+		} else {
+			await userMutate(form.getFieldsValue());
+		}
 		form.resetFields();
+		setCurrentEditingUser(null);
 		setDrawerOpen(false);
 	};
 
@@ -238,13 +258,14 @@ const Users = () => {
 
 				{/* Drawer */}
 				<Drawer
-					title="Create User"
+					title={currentEditingUser ? "Edit User" : "Add User"}
 					open={drawerOpen}
 					width={720}
 					styles={{ body: { background: colorBgLayout } }}
 					destroyOnClose={true}
 					onClose={() => {
 						form.resetFields();
+						setCurrentEditingUser(null);
 						setDrawerOpen(false);
 					}}
 					extra={
@@ -264,7 +285,7 @@ const Users = () => {
 					}
 				>
 					<Form layout="vertical" form={form}>
-						<UserForm />
+						<UserForm isEditMode={!!currentEditingUser} />
 					</Form>
 				</Drawer>
 			</Space>

@@ -14,3 +14,5 @@ export const createUser = (users: CreateUserData) => api.post("/users", users);
 export const createTenant = (tenants: Tenant) => api.post("/tenants", tenants);
 export const updateUser = (user: CreateUserData, id: number) =>
 	api.patch(`/users/${id}`, user);
+export const updateTenant = (tenant: Tenant, id: number) =>
+	api.patch(`/tenants/${id}`, tenant);

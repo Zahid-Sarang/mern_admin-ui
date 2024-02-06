@@ -14,6 +14,8 @@ import {
 	RightOutlined,
 	PlusOutlined,
 	LoadingOutlined,
+	EditOutlined,
+	DeleteOutlined,
 } from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
 import {
@@ -22,11 +24,11 @@ import {
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { createTenant, getTenants } from "../../http/api";
+import { createTenant, getTenants, updateTenant } from "../../http/api";
 
 import TenantsFilter from "./TenantFilter";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "../../store";
 import TenantForm from "./forms/TenantForms";
 import { FiledData, Tenant } from "../../types";
@@ -52,21 +54,32 @@ const columns = [
 ];
 
 const Tenants = () => {
+	const {
+		token: { colorBgLayout },
+	} = theme.useToken();
 	const [form] = Form.useForm();
 	const [filterForm] = Form.useForm();
 	const [queryParams, setQueryParams] = useState({
 		perPage: TENANT_PER_PAGE,
 		currentPage: 1,
 	});
-	const {
-		token: { colorBgLayout },
-	} = theme.useToken();
 	const queryClient = useQueryClient();
 	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [currentEditingTenant, setCurrentEditingTenant] =
+		useState<Tenant | null>(null);
 	const { user } = useAuthStore();
 	if (user?.role === "manager") {
 		return <Navigate to="/" replace={true} />;
 	}
+
+	// set edit tenant data
+	useEffect(() => {
+		if (currentEditingTenant) {
+			setDrawerOpen(true);
+			form.setFieldsValue(currentEditingTenant);
+		}
+	}, [currentEditingTenant, form]);
+
 	const {
 		data: tenants,
 		isFetching,
@@ -87,7 +100,8 @@ const Tenants = () => {
 		placeholderData: keepPreviousData,
 	});
 
-	const { mutate: tenantMutate } = useMutation({
+	// create tenants api call
+	const { mutate: createTenantMutate } = useMutation({
 		mutationKey: ["user"],
 		mutationFn: async (data: Tenant) =>
 			createTenant(data).then((res) => res.data),
@@ -97,9 +111,24 @@ const Tenants = () => {
 		},
 	});
 
+	// update tenants api call
+	const { mutate: UpdateTenantMutate } = useMutation({
+		mutationKey: ["user"],
+		mutationFn: async (data: Tenant) =>
+			updateTenant(data, currentEditingTenant!.id).then((res) => res.data),
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["tenants"] });
+			return;
+		},
+	});
 	const onHandleSubmit = async () => {
 		await form.validateFields();
-		tenantMutate(form.getFieldsValue());
+		const isEditMode = !!currentEditingTenant;
+		if (isEditMode) {
+			await UpdateTenantMutate(form.getFieldsValue());
+		} else {
+			await createTenantMutate(form.getFieldsValue());
+		}
 		form.resetFields();
 		setDrawerOpen(false);
 	};
@@ -108,12 +137,11 @@ const Tenants = () => {
 	const debouncedQUpdate = useMemo(() => {
 		return debounce((value: string | undefined) => {
 			setQueryParams((prev) => ({ ...prev, q: value }));
-		}, 1000);
+		}, 500);
 	}, []);
 
 	// filter Function
 	const onFilterChange = (changedFields: FiledData[]) => {
-		console.log(changedFields);
 		const changedFilterFields = changedFields
 			.map((item) => ({
 				[item.name[0]]: item.value,
@@ -166,7 +194,31 @@ const Tenants = () => {
 				</Form>
 
 				<Table
-					columns={columns}
+					columns={[
+						...columns,
+						{
+							title: "Action",
+							render: (_: string, record: Tenant) => {
+								return (
+									<Space>
+										<Button
+											type="link"
+											onClick={() => {
+												setCurrentEditingTenant(record);
+											}}
+										>
+											<EditOutlined />
+											Edit
+										</Button>
+										<Button type="link">
+											<DeleteOutlined />
+											Delete
+										</Button>
+									</Space>
+								);
+							},
+						},
+					]}
 					dataSource={tenants?.data}
 					rowKey={"id"}
 					pagination={{
@@ -186,7 +238,7 @@ const Tenants = () => {
 
 				{/* Drawer */}
 				<Drawer
-					title="Create Tenants"
+					title={currentEditingTenant ? "Edit Tenants" : "Create Restaurants"}
 					open={drawerOpen}
 					width={720}
 					styles={{ body: { background: colorBgLayout } }}
@@ -194,6 +246,7 @@ const Tenants = () => {
 					onClose={() => {
 						form.resetFields();
 						setDrawerOpen(false);
+						setCurrentEditingTenant(null);
 					}}
 					extra={
 						<Space>

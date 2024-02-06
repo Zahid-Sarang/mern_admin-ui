@@ -10,11 +10,15 @@ import {
 	theme,
 	Typography,
 } from "antd";
+
 import {
 	RightOutlined,
 	PlusOutlined,
 	LoadingOutlined,
+	EditOutlined,
+	DeleteOutlined,
 } from "@ant-design/icons";
+
 import { Link, Navigate } from "react-router-dom";
 import {
 	keepPreviousData,
@@ -115,7 +119,6 @@ const Users = () => {
 			const queryString = new URLSearchParams(
 				filterParams as unknown as Record<string, string>
 			).toString();
-			console.log("queryString", queryString);
 			return getUsers(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,
@@ -229,7 +232,12 @@ const Users = () => {
 												setCurrentEditingUser(record);
 											}}
 										>
+											<EditOutlined />
 											Edit
+										</Button>
+										<Button type="link">
+											<DeleteOutlined />
+											Delete
 										</Button>
 									</Space>
 								);

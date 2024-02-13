@@ -281,6 +281,7 @@ const Users = () => {
 							<Button
 								onClick={() => {
 									form.resetFields();
+									setCurrentEditingUser(null);
 									setDrawerOpen(false);
 								}}
 							>

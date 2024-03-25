@@ -1,29 +1,7 @@
-import {
-	Breadcrumb,
-	Button,
-	Drawer,
-	Flex,
-	Form,
-	Space,
-	Spin,
-	Table,
-	theme,
-	Typography,
-} from "antd";
-import {
-	RightOutlined,
-	PlusOutlined,
-	LoadingOutlined,
-	EditOutlined,
-	DeleteOutlined,
-} from "@ant-design/icons";
+import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography } from "antd";
+import { RightOutlined, PlusOutlined, LoadingOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
-import {
-	keepPreviousData,
-	useMutation,
-	useQuery,
-	useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTenant, getTenants, updateTenant } from "../../http/api";
 
 import TenantsFilter from "./TenantFilter";
@@ -65,8 +43,7 @@ const Tenants = () => {
 	});
 	const queryClient = useQueryClient();
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [currentEditingTenant, setCurrentEditingTenant] =
-		useState<Tenant | null>(null);
+	const [currentEditingTenant, setCurrentEditingTenant] = useState<Tenant | null>(null);
 	const { user } = useAuthStore();
 	if (user?.role === "manager") {
 		return <Navigate to="/" replace={true} />;
@@ -88,13 +65,9 @@ const Tenants = () => {
 	} = useQuery({
 		queryKey: ["tenants", queryParams],
 		queryFn: () => {
-			const filterParams = Object.fromEntries(
-				Object.entries(queryParams).filter((item) => !!item[1])
-			);
+			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
 
-			const queryString = new URLSearchParams(
-				filterParams as unknown as Record<string, string>
-			).toString();
+			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
 			return getTenants(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,
@@ -103,8 +76,7 @@ const Tenants = () => {
 	// create tenants api call
 	const { mutate: createTenantMutate } = useMutation({
 		mutationKey: ["user"],
-		mutationFn: async (data: Tenant) =>
-			createTenant(data).then((res) => res.data),
+		mutationFn: async (data: Tenant) => createTenant(data).then((res) => res.data),
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ["tenants"] });
 			return;
@@ -114,8 +86,7 @@ const Tenants = () => {
 	// update tenants api call
 	const { mutate: UpdateTenantMutate } = useMutation({
 		mutationKey: ["user"],
-		mutationFn: async (data: Tenant) =>
-			updateTenant(data, currentEditingTenant!.id).then((res) => res.data),
+		mutationFn: async (data: Tenant) => updateTenant(data, currentEditingTenant!.id).then((res) => res.data),
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ["tenants"] });
 			return;
@@ -172,22 +143,12 @@ const Tenants = () => {
 							},
 						]}
 					/>
-					{isFetching && (
-						<Spin
-							indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}
-						/>
-					)}
-					{isError && (
-						<Typography.Text type="danger">{error.message}</Typography.Text>
-					)}
+					{isFetching && <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />}
+					{isError && <Typography.Text type="danger">{error.message}</Typography.Text>}
 				</Flex>
 				<Form form={filterForm} onFieldsChange={onFilterChange}>
 					<TenantsFilter>
-						<Button
-							type="primary"
-							icon={<PlusOutlined />}
-							onClick={() => setDrawerOpen(true)}
-						>
+						<Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
 							Create Restaurants
 						</Button>
 					</TenantsFilter>

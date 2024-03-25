@@ -21,11 +21,7 @@ const UsersFilter = ({ children }: UsersFilterProps) => {
 							</Col>
 							<Col span={8}>
 								<Form.Item name="role">
-									<Select
-										style={{ width: "100%" }}
-										placeholder="Select role"
-										allowClear={true}
-									>
+									<Select style={{ width: "100%" }} placeholder="Select role" allowClear={true}>
 										<Select.Option value="admin">Admin</Select.Option>
 										<Select.Option value="manager">Manager</Select.Option>
 										<Select.Option value="customer">Customer</Select.Option>

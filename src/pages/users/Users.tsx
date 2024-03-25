@@ -1,31 +1,9 @@
-import {
-	Breadcrumb,
-	Button,
-	Drawer,
-	Flex,
-	Form,
-	Space,
-	Spin,
-	Table,
-	theme,
-	Typography,
-} from "antd";
+import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography } from "antd";
 
-import {
-	RightOutlined,
-	PlusOutlined,
-	LoadingOutlined,
-	EditOutlined,
-	DeleteOutlined,
-} from "@ant-design/icons";
+import { RightOutlined, PlusOutlined, LoadingOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { Link, Navigate } from "react-router-dom";
-import {
-	keepPreviousData,
-	useMutation,
-	useQuery,
-	useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createUser, getUsers, updateUser } from "../../http/api";
 import { User, CreateUserData, FiledData } from "../../types";
 import { useAuthStore } from "../../store";
@@ -78,9 +56,7 @@ const Users = () => {
 	const [filterForm] = Form.useForm();
 	const { user } = useAuthStore();
 	const queryClient = useQueryClient();
-	const [currentEditingUser, setCurrentEditingUser] = useState<User | null>(
-		null
-	);
+	const [currentEditingUser, setCurrentEditingUser] = useState<User | null>(null);
 	const {
 		token: { colorBgLayout },
 	} = theme.useToken();
@@ -113,12 +89,8 @@ const Users = () => {
 	} = useQuery({
 		queryKey: ["users", queryParams],
 		queryFn: () => {
-			const filterParams = Object.fromEntries(
-				Object.entries(queryParams).filter((item) => !!item[1])
-			);
-			const queryString = new URLSearchParams(
-				filterParams as unknown as Record<string, string>
-			).toString();
+			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
+			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
 			return getUsers(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,
@@ -126,8 +98,7 @@ const Users = () => {
 
 	const { mutate: userMutate } = useMutation({
 		mutationKey: ["user"],
-		mutationFn: async (data: CreateUserData) =>
-			createUser(data).then((res) => res.data),
+		mutationFn: async (data: CreateUserData) => createUser(data).then((res) => res.data),
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			return;
@@ -136,8 +107,7 @@ const Users = () => {
 
 	const { mutate: updateUserMutate } = useMutation({
 		mutationKey: ["Update-user"],
-		mutationFn: async (data: CreateUserData) =>
-			updateUser(data, currentEditingUser!.id).then((res) => res.data),
+		mutationFn: async (data: CreateUserData) => updateUser(data, currentEditingUser!.id).then((res) => res.data),
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			return;
@@ -198,22 +168,12 @@ const Users = () => {
 							},
 						]}
 					/>
-					{isFetching && (
-						<Spin
-							indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}
-						/>
-					)}
-					{isError && (
-						<Typography.Text type="danger">{error.message}</Typography.Text>
-					)}
+					{isFetching && <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />}
+					{isError && <Typography.Text type="danger">{error.message}</Typography.Text>}
 				</Flex>
 				<Form form={filterForm} onFieldsChange={onFilterChange}>
 					<UsersFilter>
-						<Button
-							type="primary"
-							icon={<PlusOutlined />}
-							onClick={() => setDrawerOpen(true)}
-						>
+						<Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
 							Create User
 						</Button>
 					</UsersFilter>
@@ -250,7 +210,7 @@ const Users = () => {
 						total: users?.total,
 						pageSize: queryParams.perPage,
 						current: queryParams.currentPage,
-						onChange: (page, pageSie) => {
+						onChange: (page) => {
 							setQueryParams((prev) => {
 								return {
 									...prev,

@@ -1,14 +1,4 @@
-import {
-	Layout,
-	Card,
-	Space,
-	Form,
-	Input,
-	Checkbox,
-	Button,
-	Flex,
-	Alert,
-} from "antd";
+import { Layout, Card, Space, Form, Input, Checkbox, Button, Flex, Alert } from "antd";
 import { LockFilled, UserOutlined, LockOutlined } from "@ant-design/icons";
 import Logo from "../../components/icons/Logo";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -60,9 +50,7 @@ const LoginPage = () => {
 
 	return (
 		<>
-			<Layout
-				style={{ height: "100vh", display: "grid", placeItems: "center" }}
-			>
+			<Layout style={{ height: "100vh", display: "grid", placeItems: "center" }}>
 				<Space direction="vertical" align="center" size="large">
 					<Layout.Content
 						style={{
@@ -97,13 +85,7 @@ const LoginPage = () => {
 								mutate({ email: values.username, password: values.password });
 							}}
 						>
-							{isError && (
-								<Alert
-									style={{ marginBottom: 24 }}
-									type="error"
-									message={error?.message}
-								/>
-							)}
+							{isError && <Alert style={{ marginBottom: 24 }} type="error" message={error?.message} />}
 							<Form.Item
 								name="username"
 								rules={[
@@ -128,10 +110,7 @@ const LoginPage = () => {
 									},
 								]}
 							>
-								<Input.Password
-									prefix={<LockOutlined />}
-									placeholder="Password"
-								/>
+								<Input.Password prefix={<LockOutlined />} placeholder="Password" />
 							</Form.Item>
 							<Flex justify="space-between">
 								<Form.Item name="remember" valuePropName="checked">
@@ -142,12 +121,7 @@ const LoginPage = () => {
 								</a>
 							</Flex>
 							<Form.Item>
-								<Button
-									type="primary"
-									htmlType="submit"
-									style={{ width: "100%" }}
-									loading={isPending}
-								>
+								<Button type="primary" htmlType="submit" style={{ width: "100%" }} loading={isPending}>
 									Log in
 								</Button>
 							</Form.Item>

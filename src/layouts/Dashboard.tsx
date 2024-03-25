@@ -1,15 +1,6 @@
 import { useState } from "react";
 import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
-import {
-	Avatar,
-	Badge,
-	Dropdown,
-	Flex,
-	Layout,
-	Menu,
-	Space,
-	theme,
-} from "antd";
+import { Avatar, Badge, Dropdown, Flex, Layout, Menu, Space, theme } from "antd";
 import Icon, { BellFilled } from "@ant-design/icons";
 
 import { useAuthStore } from "../store";
@@ -79,33 +70,18 @@ const Dashboard = () => {
 	} = theme.useToken();
 
 	if (user === null) {
-		return (
-			<Navigate
-				to={`/auth/login?returnTo=${location.pathname}`}
-				replace={true}
-			/>
-		);
+		return <Navigate to={`/auth/login?returnTo=${location.pathname}`} replace={true} />;
 	}
 
 	const items = getMenuItems(user.role);
 	return (
 		<div>
 			<Layout style={{ minHeight: "100vh", background: colorBgContainer }}>
-				<Sider
-					theme="light"
-					collapsible
-					collapsed={collapsed}
-					onCollapse={(value) => setCollapsed(value)}
-				>
+				<Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
 					<div className="logo">
 						<Logo />
 					</div>
-					<Menu
-						theme="light"
-						defaultSelectedKeys={[`${location.pathname}`]}
-						mode="inline"
-						items={items}
-					/>
+					<Menu theme="light" defaultSelectedKeys={[`${location.pathname}`]} mode="inline" items={items} />
 				</Sider>
 				<Layout>
 					<Header
@@ -116,12 +92,7 @@ const Dashboard = () => {
 						}}
 					>
 						<Flex gap="middle" align="start" justify="space-between">
-							<Badge
-								text={
-									user.role === "admin" ? "You are an admin" : user.tenant?.name
-								}
-								status="success"
-							/>
+							<Badge text={user.role === "admin" ? "You are an admin" : user.tenant?.name} status="success" />
 							<Space size={16}>
 								<Badge dot={true}>
 									<BellFilled />
@@ -138,11 +109,7 @@ const Dashboard = () => {
 									}}
 									placement="bottomRight"
 								>
-									<Avatar
-										style={{ backgroundColor: "#fde3cf", color: "#f56a00" }}
-									>
-										U
-									</Avatar>
+									<Avatar style={{ backgroundColor: "#fde3cf", color: "#f56a00" }}>U</Avatar>
 								</Dropdown>
 							</Space>
 						</Flex>

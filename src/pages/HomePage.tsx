@@ -1,15 +1,4 @@
-import {
-	Button,
-	Card,
-	Col,
-	List,
-	Row,
-	Skeleton,
-	Space,
-	Statistic,
-	Tag,
-	Typography,
-} from "antd";
+import { Button, Card, Col, List, Row, Skeleton, Space, Statistic, Tag, Typography } from "antd";
 import Icon from "@ant-design/icons";
 import { useAuthStore } from "../store";
 import { BarChartIcon } from "../components/icons/BarChart";
@@ -72,13 +61,7 @@ interface CardTitleProps {
 	iconRadius?: string;
 }
 
-const CardTitle = ({
-	title,
-	PrefixIcon,
-	iconColor,
-	iconBackgroundColor,
-	iconRadius,
-}: CardTitleProps) => {
+const CardTitle = ({ title, PrefixIcon, iconColor, iconBackgroundColor, iconRadius }: CardTitleProps) => {
 	const iconStyle = {
 		color: iconColor,
 		backgroundColor: iconBackgroundColor,
@@ -176,9 +159,7 @@ function HomePage() {
 								<List.Item>
 									<Skeleton avatar title={false} loading={item.loading} active>
 										<List.Item.Meta
-											title={
-												<a href="https://ant.design">{item.OrderSummary}</a>
-											}
+											title={<a href="https://ant.design">{item.OrderSummary}</a>}
 											description={item.address}
 										/>
 										<Row style={{ flex: 1 }} justify="space-between">

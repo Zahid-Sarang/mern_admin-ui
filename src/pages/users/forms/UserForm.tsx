@@ -81,11 +81,7 @@ const UserForm = ({ isEditMode = false }: { isEditMode: boolean }) => {
 												},
 											]}
 										>
-											<Input
-												size="large"
-												placeholder="Password"
-												type="password"
-											/>
+											<Input size="large" placeholder="Password" type="password" />
 										</Form.Item>
 									</Col>
 								</Row>
@@ -118,7 +114,7 @@ const UserForm = ({ isEditMode = false }: { isEditMode: boolean }) => {
 										</Select>
 									</Form.Item>
 								</Col>
-								{selectedRole === 'manager' && (
+								{selectedRole === "manager" && (
 									<Col span={12}>
 										<Form.Item
 											label="Restaurant"

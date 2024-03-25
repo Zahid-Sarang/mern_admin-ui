@@ -4,7 +4,6 @@ import * as React from "react";
 
 type UsersFilterProps = {
 	children?: React.ReactNode;
-	// onFilterChange: (filterName: string, filterValue: string) => void;
 };
 
 const UsersFilter = ({ children }: UsersFilterProps) => {

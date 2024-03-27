@@ -10,7 +10,7 @@ import { useAuthStore } from "../../store";
 import UsersFilter from "./UsersFilter";
 import { useEffect, useMemo, useState } from "react";
 import UserForm from "./forms/UserForm";
-import { PER_PAGE } from "../../constants";
+import { USER_PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
 
 const columns = [
@@ -62,7 +62,7 @@ const Users = () => {
 	} = theme.useToken();
 
 	const [queryParams, setQueryParams] = useState({
-		perPage: PER_PAGE,
+		perPage: USER_PER_PAGE,
 		currentPage: 1,
 	});
 
@@ -88,10 +88,11 @@ const Users = () => {
 		error,
 	} = useQuery({
 		queryKey: ["users", queryParams],
-		queryFn: () => {
+		queryFn: async () => {
 			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
 			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
-			return getUsers(queryString).then((res) => res.data);
+			const res = await getUsers(queryString);
+			return res.data;
 		},
 		placeholderData: keepPreviousData,
 	});

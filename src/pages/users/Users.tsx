@@ -10,7 +10,7 @@ import { useAuthStore } from "../../store";
 import UsersFilter from "./UsersFilter";
 import { useEffect, useMemo, useState } from "react";
 import UserForm from "./forms/UserForm";
-import { USER_PER_PAGE } from "../../constants";
+import { PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
 
 const columns = [
@@ -62,7 +62,7 @@ const Users = () => {
 	} = theme.useToken();
 
 	const [queryParams, setQueryParams] = useState({
-		perPage: USER_PER_PAGE,
+		perPage: PER_PAGE,
 		currentPage: 1,
 	});
 

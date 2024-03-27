@@ -1,4 +1,4 @@
-import { AUTH_SERVICE } from "../constants";
+import { AUTH_SERVICE, CATALOGG_SERVICE } from "../constants";
 import { CreateUserData, Credentials, Tenant } from "../types";
 import { api } from "./client";
 
@@ -14,3 +14,5 @@ export const updateUser = (user: CreateUserData, id: number) => api.patch(`${AUT
 export const updateTenant = (tenant: Tenant, id: number) => api.patch(`${AUTH_SERVICE}/tenants/${id}`, tenant);
 
 // Catalog Service
+export const getCategories = () => api.get(`${CATALOGG_SERVICE}/categories`);
+export const getProducts = (queryParam: string) => api.get(`${CATALOGG_SERVICE}/products?${queryParam}`);

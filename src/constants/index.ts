@@ -4,7 +4,7 @@ export const getSelf = async () => {
 	return data;
 };
 
-export const USER_PER_PAGE = 8;
+export const PER_PAGE = 8;
 export const TENANT_PER_PAGE = 6;
 
 export const AUTH_SERVICE = "/api/auth";

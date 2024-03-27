@@ -1,10 +1,27 @@
+import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography } from "antd";
+import { getCategories, getTenants } from "../../http/api";
+import { Category, Tenant } from "../../types";
 
 type ProductsFilerProps = {
 	children?: React.ReactNode;
 };
 
 const ProductsFilter = ({ children }: ProductsFilerProps) => {
+	const { data: restaurants } = useQuery({
+		queryKey: ["restaurants"],
+		queryFn: () => {
+			return getTenants(`perPage=100&currentPage=1`);
+		},
+	});
+
+	const { data: categories } = useQuery({
+		queryKey: ["categories"],
+		queryFn: () => {
+			return getCategories();
+		},
+	});
+
 	return (
 		<Card>
 			<Row justify="space-between">
@@ -18,16 +35,26 @@ const ProductsFilter = ({ children }: ProductsFilerProps) => {
 						<Col span={6}>
 							<Form.Item name="category">
 								<Select style={{ width: "100%" }} placeholder="Select category" allowClear={true}>
-									<Select.Option value="pizza">Pizza</Select.Option>
-									<Select.Option value="drinks">Cold Drinks</Select.Option>
+									{categories?.data.map((category: Category) => {
+										return (
+											<Select.Option key={category._id} value={category._id}>
+												{category.name}
+											</Select.Option>
+										);
+									})}
 								</Select>
 							</Form.Item>
 						</Col>
 						<Col span={6}>
 							<Form.Item name="restaurant">
 								<Select style={{ width: "100%" }} placeholder="Select restaurant" allowClear={true}>
-									<Select.Option value="mumbai">Mumbai Chat</Select.Option>
-									<Select.Option value="delhi-zaika">Delhi Zaika</Select.Option>
+									{restaurants?.data.data.map((restaurant: Tenant) => {
+										return (
+											<Select.Option key={restaurant.id} value={restaurant.id}>
+												{restaurant.name}
+											</Select.Option>
+										);
+									})}
 								</Select>
 							</Form.Item>
 						</Col>

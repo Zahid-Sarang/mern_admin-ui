@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography } from "antd";
 import { getCategories, getTenants } from "../../http/api";
 import { Category, Tenant } from "../../types";
+import { useAuthStore } from "../../store";
 
 type ProductsFilerProps = {
 	children?: React.ReactNode;
 };
 
 const ProductsFilter = ({ children }: ProductsFilerProps) => {
+	const { user } = useAuthStore();
 	const { data: restaurants } = useQuery({
 		queryKey: ["restaurants"],
 		queryFn: () => {
@@ -45,19 +47,22 @@ const ProductsFilter = ({ children }: ProductsFilerProps) => {
 								</Select>
 							</Form.Item>
 						</Col>
-						<Col span={6}>
-							<Form.Item name="tenantId">
-								<Select style={{ width: "100%" }} placeholder="Select restaurant" allowClear={true}>
-									{restaurants?.data.data.map((restaurant: Tenant) => {
-										return (
-											<Select.Option key={restaurant.id} value={restaurant.id}>
-												{restaurant.name}
-											</Select.Option>
-										);
-									})}
-								</Select>
-							</Form.Item>
-						</Col>
+						{user!.role === "admin" && (
+							<Col span={6}>
+								<Form.Item name="tenantId">
+									<Select style={{ width: "100%" }} placeholder="Select restaurant" allowClear={true}>
+										{restaurants?.data.data.map((restaurant: Tenant) => {
+											return (
+												<Select.Option key={restaurant.id} value={restaurant.id}>
+													{restaurant.name}
+												</Select.Option>
+											);
+										})}
+									</Select>
+								</Form.Item>
+							</Col>
+						)}
+
 						<Col span={6}>
 							<Space>
 								<Form.Item name="isPublish">

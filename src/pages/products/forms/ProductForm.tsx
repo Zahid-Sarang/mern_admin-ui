@@ -1,28 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography, Upload } from "antd";
+import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography, Upload, UploadProps, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { Category, Tenant } from "../../../types";
 import { getCategories, getTenants } from "../../../http/api";
 import Pricing from "./Pricing";
 import Attributes from "./Attributes";
+import { useState } from "react";
 
 const ProductForm = () => {
+	const [messageApi, contextHolder] = message.useMessage();
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const selectedCategory = Form.useWatch("categoryId");
-	// Categories
 	const { data: categories } = useQuery({
 		queryKey: ["categories"],
 		queryFn: () => {
 			return getCategories();
 		},
 	});
-
-	// Tenants
 	const { data: tenants } = useQuery({
 		queryKey: ["tenants"],
 		queryFn: async () => {
 			return getTenants(`perPage=100&currentPage=1`).then((res) => res.data);
 		},
 	});
+
+	const uploadConfig: UploadProps = {
+		name: "file",
+		multiple: false,
+		showUploadList: false,
+		beforeUpload: (file) => {
+			const isValidFileType = file.type === "image/jpeg" || file.type === "image/png";
+			if (!isValidFileType) {
+				console.log("Please upload a valid file type");
+				messageApi.error("Please upload a valid only jpeg and png");
+			}
+
+			// todo: size validation
+			setImageUrl(URL.createObjectURL(file));
+
+			return false;
+		},
+	};
 	return (
 		<>
 			<Row>
@@ -106,11 +124,16 @@ const ProductForm = () => {
 											},
 										]}
 									>
-										<Upload listType="picture-card">
-											<Space direction="vertical">
-												<PlusOutlined />
-												<Typography.Text>Upload</Typography.Text>
-											</Space>
+										{contextHolder}
+										<Upload listType="picture-card" {...uploadConfig}>
+											{imageUrl ? (
+												<img src={imageUrl} alt="product-image" style={{ width: "100%" }} />
+											) : (
+												<Space direction="vertical">
+													<PlusOutlined />
+													<Typography.Text>Upload</Typography.Text>
+												</Space>
+											)}
 										</Upload>
 									</Form.Item>
 								</Col>

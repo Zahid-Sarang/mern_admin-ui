@@ -16,3 +16,9 @@ export const updateTenant = (tenant: Tenant, id: number) => api.patch(`${AUTH_SE
 // Catalog Service
 export const getCategories = () => api.get(`${CATALOGG_SERVICE}/categories`);
 export const getProducts = (queryParam: string) => api.get(`${CATALOGG_SERVICE}/products?${queryParam}`);
+export const createProduct = (product: FormData) =>
+	api.post(`${CATALOGG_SERVICE}/products`, product, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});

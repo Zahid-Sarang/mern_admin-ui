@@ -3,14 +3,15 @@ import { Breadcrumb, Button, Flex, Form, Space, Table, Image, Typography, Tag, S
 import { RightOutlined, LoadingOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import ProductsFilter from "./ProductsFilter";
 import { FiledData, Product } from "../../types";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PRODUCT_PER_PAGE } from "../../constants";
 import { useMemo, useState } from "react";
-import { getProducts } from "../../http/api";
+import { createProduct, getProducts } from "../../http/api";
 import { format } from "date-fns";
 import { debounce } from "lodash";
 import { useAuthStore } from "../../store";
 import ProductForm from "./forms/ProductForm";
+import { makeFormData } from "./helpers";
 
 const columns = [
 	{
@@ -106,10 +107,52 @@ const Products = () => {
 		}
 	};
 
-	// Submit
+	const queryClient = useQueryClient();
+	const { mutate: productMutate } = useMutation({
+		mutationKey: ["createProduct"],
+		mutationFn: async (data: FormData) => createProduct(data).then((res) => res.data),
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["products"] });
+			form.resetFields();
+			setDrawerOpen(false);
+			return;
+		},
+	});
 
-	const onHandleSubmit = () => {
-		console.log("...onSubmit");
+	// Handle form data
+	const onHandleSubmit = async () => {
+		await form.validateFields();
+		const priceConfiguration = form.getFieldValue("priceConfiguration");
+		const pricing = Object.entries(priceConfiguration).reduce((acc, [key, value]) => {
+			const parsedKey = JSON.parse(key);
+			return {
+				...acc,
+				[parsedKey.configurationKey]: {
+					priceType: parsedKey.priceType,
+					availableOptions: value,
+				},
+			};
+		}, {});
+
+		const categoryId = JSON.parse(form.getFieldValue("categoryId"))._id;
+		const attributes = Object.entries(form.getFieldValue("attributes")).map(([key, value]) => {
+			return {
+				name: key,
+				value: value,
+			};
+		});
+
+		const postData = {
+			...form.getFieldsValue(),
+			isPublish: form.getFieldValue("isPublish") ? true : false,
+			image: form.getFieldValue("image"),
+			categoryId,
+			priceConfiguration: pricing,
+			attributes: attributes,
+		};
+
+		const formData = makeFormData(postData);
+		await productMutate(formData);
 	};
 	return (
 		<>

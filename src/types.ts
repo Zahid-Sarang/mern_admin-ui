@@ -40,7 +40,7 @@ export interface PriceConfiguration {
 	};
 }
 
-export interface Attributes {
+export interface Attribute {
 	name: string;
 	widgetType: "switch" | "radio";
 	defaultValue: string;
@@ -51,7 +51,7 @@ export interface Category {
 	_id: string;
 	name: string;
 	priceConfiguration: PriceConfiguration;
-	attributes: Attributes[];
+	attributes: Attribute[];
 }
 
 export type Product = {

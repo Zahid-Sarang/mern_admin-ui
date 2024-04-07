@@ -6,8 +6,10 @@ import { getCategories, getTenants } from "../../../http/api";
 import Pricing from "./Pricing";
 import Attributes from "./Attributes";
 import ProductImage from "./ProductImage";
+import { useAuthStore } from "../../../store";
 
 const ProductForm = () => {
+	const { user } = useAuthStore();
 	const selectedCategory = Form.useWatch("categoryId");
 	const { data: categories } = useQuery({
 		queryKey: ["categories"],
@@ -100,37 +102,38 @@ const ProductForm = () => {
 							</Row>
 						</Card>
 
-						<Card title="Resturant Info" bordered={false}>
-							<Row gutter={20}>
-								<Col span={24}>
-									<Form.Item
-										label=" Select Restaurant"
-										name="tenantId"
-										rules={[
-											{
-												required: true,
-												message: "Please Select Restuarant!",
-											},
-										]}
-									>
-										<Select
-											size="large"
-											style={{ width: "100%" }}
-											placeholder="Select Restaurant"
-											allowClear={true}
-											onChange={() => {}}
+						{user?.role !== "manager" && (
+							<Card title="Resturant Info" bordered={false}>
+								<Row gutter={20}>
+									<Col span={24}>
+										<Form.Item
+											label=" Select Restaurant"
+											name="tenantId"
+											rules={[
+												{
+													required: true,
+													message: "Please Select Restuarant!",
+												},
+											]}
 										>
-											{tenants?.data.map((tenants: Tenant) => (
-												<Select.Option value={tenants.id} key={tenants.id}>
-													{tenants.name}
-												</Select.Option>
-											))}
-										</Select>
-									</Form.Item>
-								</Col>
-							</Row>
-						</Card>
-
+											<Select
+												size="large"
+												style={{ width: "100%" }}
+												placeholder="Select Restaurant"
+												allowClear={true}
+												onChange={() => {}}
+											>
+												{tenants?.data.map((tenants: Tenant) => (
+													<Select.Option value={tenants.id} key={tenants.id}>
+														{tenants.name}
+													</Select.Option>
+												))}
+											</Select>
+										</Form.Item>
+									</Col>
+								</Row>
+							</Card>
+						)}
 						{selectedCategory && <Pricing selectedCategory={selectedCategory} />}
 						{selectedCategory && <Attributes selectedCategory={selectedCategory} />}
 

@@ -1,5 +1,5 @@
 import { AUTH_SERVICE, CATALOG_SERVICE, ORDER_SERVICE } from "../constants";
-import { CreateUserData, Credentials, Tenant } from "../types";
+import { CreateUserData, Credentials, OrderStatus, Tenant } from "../types";
 import { api } from "./client";
 
 // Auth Service
@@ -35,3 +35,6 @@ export const updateProduct = (product: FormData, productId: string) =>
 export const getOrders = (queryString: string) => api.get(`${ORDER_SERVICE}/orders?${queryString}`);
 export const getSingle = (orderId: string, queryString: string) =>
 	api.get(`${ORDER_SERVICE}/orders/${orderId}?${queryString}`);
+
+export const changeStatus = (orderId: string, data: { status: OrderStatus }) =>
+	api.patch(`${ORDER_SERVICE}/orders/change-status/${orderId}`, data);

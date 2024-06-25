@@ -1,4 +1,4 @@
-import { AUTH_SERVICE, CATALOGG_SERVICE } from "../constants";
+import { AUTH_SERVICE, CATALOG_SERVICE, ORDER_SERVICE } from "../constants";
 import { CreateUserData, Credentials, Tenant } from "../types";
 import { api } from "./client";
 
@@ -14,18 +14,22 @@ export const updateUser = (user: CreateUserData, id: number) => api.patch(`${AUT
 export const updateTenant = (tenant: Tenant, id: number) => api.patch(`${AUTH_SERVICE}/tenants/${id}`, tenant);
 
 // Catalog Service
-export const getCategories = () => api.get(`${CATALOGG_SERVICE}/categories`);
-export const getCategory = (categpryId: string) => api.get(`${CATALOGG_SERVICE}/categories/${categpryId}`);
-export const getProducts = (queryParam: string) => api.get(`${CATALOGG_SERVICE}/products?${queryParam}`);
+export const getCategories = () => api.get(`${CATALOG_SERVICE}/categories`);
+export const getCategory = (categpryId: string) => api.get(`${CATALOG_SERVICE}/categories/${categpryId}`);
+export const getProducts = (queryParam: string) => api.get(`${CATALOG_SERVICE}/products?${queryParam}`);
 export const createProduct = (product: FormData) =>
-	api.post(`${CATALOGG_SERVICE}/products`, product, {
+	api.post(`${CATALOG_SERVICE}/products`, product, {
 		headers: {
 			"Content-Type": "multipart/form-data",
 		},
 	});
 export const updateProduct = (product: FormData, productId: string) =>
-	api.put(`${CATALOGG_SERVICE}/products/${productId}`, product, {
+	api.put(`${CATALOG_SERVICE}/products/${productId}`, product, {
 		headers: {
 			"Content-Type": "multipart/form-data",
 		},
 	});
+
+// Order Services
+
+export const getOrders = (queryString: string) => api.get(`${ORDER_SERVICE}/orders?${queryString}`);

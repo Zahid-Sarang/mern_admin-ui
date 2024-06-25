@@ -34,8 +34,13 @@ const menuItemsConfig = [
 		roles: ["admin"],
 	},
 	{
-		key: "/products",
+		key: "/order",
 		icon: <Icon component={BasketIcon} />,
+		label: <NavLink to="/orders">Orders</NavLink>,
+	},
+	{
+		key: "/products",
+		icon: <Icon component={foodIcon} />,
 		label: <NavLink to="/products">Products</NavLink>,
 	},
 	{

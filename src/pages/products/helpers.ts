@@ -14,3 +14,9 @@ export const makeFormData = (data: CreateProductData) => {
 	});
 	return formData;
 };
+
+export const capitalizeFirst = (str: string) => {
+	// received ->Received
+
+	return str[0].toUpperCase() + str.slice(1);
+};

@@ -8,6 +8,7 @@ import TenantsPage from "./pages/tenants/Tenants";
 import UsersPage from "./pages/users/Users";
 import Products from "./pages/products/Products";
 import Orders from "./pages/orders/Orders";
+import SingleOrder from "./pages/orders/SingleOrder";
 
 export const router = createBrowserRouter([
 	{
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
 					{
 						path: "/orders",
 						element: <Orders />,
+					},
+					{
+						path: "/orders/:orderId",
+						element: <SingleOrder />,
 					},
 				],
 			},

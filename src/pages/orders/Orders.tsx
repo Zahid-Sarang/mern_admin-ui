@@ -7,6 +7,9 @@ import { getOrders } from "../../http/api";
 import { format } from "date-fns";
 import { colorMapping } from "../../constants";
 import { capitalizeFirst } from "../products/helpers";
+import React from "react";
+import socket from "../../lib/socket";
+import { useAuthStore } from "../../store";
 
 const columns = [
 	{
@@ -92,6 +95,26 @@ const columns = [
 const TENANT_ID = 8;
 
 const Orders = () => {
+	const { user } = useAuthStore();
+
+	React.useEffect(() => {
+		if (user?.tenant) {
+			socket.on("order-update", (data) => {
+				console.log("data received", data);
+			});
+
+			socket.on("join", (data) => {
+				console.log("User joined in", data.roomId);
+			});
+			socket.emit("join", { tenantId: user.tenant.id });
+		}
+
+		return () => {
+			socket.off("join");
+			socket.off("order-update");
+		};
+	}, [user?.tenant]);
+
 	const { data: orders } = useQuery({
 		queryKey: ["orders"],
 		queryFn: async () => {
@@ -100,8 +123,6 @@ const Orders = () => {
 			return await getOrders(queryString).then((res) => res.data);
 		},
 	});
-
-	console.log(orders);
 
 	return (
 		<Space direction="vertical" size="large" style={{ width: "100%" }}>

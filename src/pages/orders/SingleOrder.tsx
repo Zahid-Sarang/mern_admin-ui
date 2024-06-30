@@ -112,7 +112,7 @@ const SingleOrder = () => {
 										// todo: IMPORTANT: check why there is a nested array in selected toppings
 										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 										// @ts-expect-error
-										description={item.chosenConfiguration.selectedToppings[0].map((topping) => topping.name).join(",")}
+										description={item.chosenConfiguration.selectedToppings[0]?.map((topping) => topping.name).join(",")}
 									/>
 									<Space size={"large"}>
 										<Typography.Text>

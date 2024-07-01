@@ -35,6 +35,13 @@ export const updateProduct = (product: FormData, productId: string) =>
 		},
 	});
 
+export const createTopping = (topping: FormData) =>
+	api.post(`${CATALOG_SERVICE}/toppings`, topping, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+
 /**
  * Order Service Endpoints
  */

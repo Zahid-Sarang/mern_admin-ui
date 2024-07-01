@@ -73,6 +73,7 @@ export type Product = {
 
 export type ImageFiled = { file: File };
 export type CreateProductData = Product & { image: ImageFiled };
+export type CreateToppingData = Topping & { image: ImageFiled };
 
 export enum PaymentMode {
 	CARD = "card",

@@ -1,13 +1,15 @@
-import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table } from "antd";
+import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import ToppingFilter from "./ToppingFilter";
 import { Topping } from "../../types";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { getToppings } from "../../http/api";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createTopping, getToppings } from "../../http/api";
 import React from "react";
 import { TOPPING_PER_PAGE } from "../../constants";
 import { useAuthStore } from "../../store";
+import ToppingForm from "./forms/ToppingForm";
+import { makeFormData } from "../products/helpers";
 
 /**
  * name & image
@@ -40,7 +42,12 @@ const columns = [
 ];
 
 const Toppings = () => {
+	const [form] = Form.useForm();
+	const {
+		token: { colorBgLayout },
+	} = theme.useToken();
 	const { user } = useAuthStore();
+	const [drawerOpen, setDrawerOpen] = React.useState(false);
 
 	const [queryParams, setQueryParams] = React.useState({
 		perPage: TOPPING_PER_PAGE,
@@ -67,14 +74,41 @@ const Toppings = () => {
 		placeholderData: keepPreviousData,
 	});
 
+	const queryClient = useQueryClient();
+
+	const { mutate: toppingMutate, isPending: isCreateToppingsPendding } = useMutation({
+		mutationKey: ["createToppings"],
+		mutationFn: async (data: FormData) => {
+			return await createTopping(data).then((res) => res.data);
+		},
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["products"] });
+			form.resetFields();
+			setDrawerOpen(false);
+			return;
+		},
+	});
+
 	if (isLoading) {
 		return <h1>Loading.....</h1>;
 	}
 
-	console.log(toppings);
-
 	const handleDeleteTopping = (toppingId: string) => {
 		console.log("toppingId: " + toppingId);
+	};
+
+	// Handle form data
+	const onHandleSubmit = async () => {
+		await form.validateFields();
+
+		const postData = {
+			...form.getFieldsValue(),
+			tenantId: user?.role === "manager" ? user.tenant?.id : form.getFieldValue("tenantId"),
+			image: form.getFieldValue("image"),
+		};
+
+		const formData = makeFormData(postData);
+		await toppingMutate(formData);
 	};
 
 	return (
@@ -97,7 +131,7 @@ const Toppings = () => {
 				</Flex>
 				<Form>
 					<ToppingFilter>
-						<Button type="primary" icon={<PlusOutlined />}>
+						<Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
 							Add Topping
 						</Button>
 					</ToppingFilter>
@@ -145,6 +179,36 @@ const Toppings = () => {
 						},
 					}}
 				/>
+
+				{/* Drawer for create toppings */}
+				<Drawer
+					title="Add Toppings"
+					open={drawerOpen}
+					width={720}
+					styles={{ body: { background: colorBgLayout } }}
+					destroyOnClose={true}
+					onClose={() => {
+						setDrawerOpen(false);
+					}}
+					extra={
+						<Space>
+							<Button
+								onClick={() => {
+									setDrawerOpen(false);
+								}}
+							>
+								Cancel
+							</Button>
+							<Button type="primary" onClick={onHandleSubmit} loading={isCreateToppingsPendding}>
+								Save
+							</Button>
+						</Space>
+					}
+				>
+					<Form layout="vertical" form={form}>
+						<ToppingForm form={form} />
+					</Form>
+				</Drawer>
 			</Space>
 		</>
 	);

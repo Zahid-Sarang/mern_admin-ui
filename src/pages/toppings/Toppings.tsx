@@ -1,11 +1,12 @@
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { debounce } from "lodash";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme, Tag } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 import ToppingFilter from "./ToppingFilter";
-import { Topping } from "../../types";
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FiledData, Topping } from "../../types";
 import { createTopping, getToppings, updateTopping } from "../../http/api";
-import React, { useEffect } from "react";
 import { TOPPING_PER_PAGE } from "../../constants";
 import { useAuthStore } from "../../store";
 import ToppingForm from "./forms/ToppingForm";
@@ -51,12 +52,14 @@ const columns = [
 
 const Toppings = () => {
 	const [form] = Form.useForm();
+	const [filterForm] = Form.useForm();
 	const {
 		token: { colorBgLayout },
 	} = theme.useToken();
 	const { user } = useAuthStore();
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [currentTopping, setCurrentTopping] = React.useState<Topping | null>(null);
+	const queryClient = useQueryClient();
 
 	const [queryParams, setQueryParams] = React.useState({
 		perPage: TOPPING_PER_PAGE,
@@ -79,20 +82,42 @@ const Toppings = () => {
 		isFetching,
 		isError,
 		error,
-		isLoading,
 	} = useQuery({
 		queryKey: ["toppings", queryParams],
 		queryFn: async () => {
 			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
-
+			console.log("after fetching", filterParams);
 			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
-
+			console.log("before converting", queryString);
 			return await getToppings(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,
 	});
 
-	const queryClient = useQueryClient();
+	// Filter Toppings
+	const debouncedQUpdate = React.useMemo(() => {
+		return debounce((value: string | undefined) => {
+			setQueryParams((prev) => ({ ...prev, q: value, currentPage: 1 }));
+		}, 500);
+	}, []);
+
+	const onFilterChange = (changeFields: FiledData[]) => {
+		const changedFilterFields = changeFields
+			.map((item) => ({
+				[item.name[0]]: item.value,
+			}))
+			.reduce((acc, item) => ({ ...acc, ...item }), {});
+
+		if ("q" in changedFilterFields) {
+			debouncedQUpdate(changedFilterFields.q);
+		} else {
+			setQueryParams((prev) => ({
+				...prev,
+				...changedFilterFields,
+				currentPage: 1,
+			}));
+		}
+	};
 
 	const { mutate: toppingMutate, isPending: isCreateToppingsPendding } = useMutation({
 		mutationKey: ["createToppings"],
@@ -110,10 +135,6 @@ const Toppings = () => {
 			return;
 		},
 	});
-
-	if (isLoading) {
-		return <h1>Loading.....</h1>;
-	}
 
 	const handleDeleteTopping = (toppingId: string) => {
 		console.log("toppingId: " + toppingId);
@@ -151,7 +172,7 @@ const Toppings = () => {
 					{isFetching && <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />}
 					{isError && <Typography.Text type="danger">{error.message}</Typography.Text>}
 				</Flex>
-				<Form>
+				<Form form={filterForm} onFieldsChange={onFilterChange}>
 					<ToppingFilter>
 						<Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
 							Add Topping
@@ -191,10 +212,10 @@ const Toppings = () => {
 							},
 						},
 					]}
-					dataSource={toppings.data}
+					dataSource={toppings?.data}
 					rowKey={"id"}
 					pagination={{
-						total: toppings.total,
+						total: toppings?.total,
 						pageSize: queryParams.perPage,
 						current: queryParams.currentPage,
 						onChange: (page) => {

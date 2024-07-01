@@ -47,7 +47,7 @@ const ToppingForm = ({ form }: { form: FormInstance }) => {
 											},
 										]}
 									>
-										<InputNumber size="large" placeholder="Topping Price" style={{ width: "100%" }} />
+										<InputNumber addonAfter="₹" size="large" placeholder="Topping Price" style={{ width: "100%" }} />
 									</Form.Item>
 								</Col>
 							</Row>

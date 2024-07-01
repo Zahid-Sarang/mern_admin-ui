@@ -22,6 +22,7 @@ export const getCategories = () => api.get(`${CATALOG_SERVICE}/categories`);
 export const getCategory = (categpryId: string) => api.get(`${CATALOG_SERVICE}/categories/${categpryId}`);
 export const getProducts = (queryParam: string) => api.get(`${CATALOG_SERVICE}/products?${queryParam}`);
 export const getToppings = (queryParam: string) => api.get(`${CATALOG_SERVICE}/toppings?${queryParam}`);
+export const deleteTopping = (toppingId: string) => api.delete(`${CATALOG_SERVICE}/toppings/${toppingId}`);
 export const createProduct = (product: FormData) =>
 	api.post(`${CATALOG_SERVICE}/products`, product, {
 		headers: {

@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { debounce } from "lodash";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme, Tag } from "antd";
+import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme, Tag, Modal } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import ToppingFilter from "./ToppingFilter";
 import { FiledData, Topping } from "../../types";
-import { createTopping, getToppings, updateTopping } from "../../http/api";
+import { createTopping, deleteTopping, getToppings, updateTopping } from "../../http/api";
 import { TOPPING_PER_PAGE } from "../../constants";
 import { useAuthStore } from "../../store";
 import ToppingForm from "./forms/ToppingForm";
@@ -66,6 +66,9 @@ const Toppings = () => {
 		currentPage: 1,
 		tenantId: user!.role === "manager" ? user?.tenant?.id : undefined,
 	});
+	const [open, setOpen] = React.useState(false);
+	const [confirmLoading, setConfirmLoading] = React.useState(false);
+	const [deleteToppingId, setDeleteToppingId] = React.useState<Topping | null>(null);
 
 	// set Toppings for Edit
 
@@ -136,8 +139,33 @@ const Toppings = () => {
 		},
 	});
 
-	const handleDeleteTopping = (toppingId: string) => {
-		console.log("toppingId: " + toppingId);
+	const { mutate: deleteToppingMutate, isPending } = useMutation({
+		mutationKey: ["deleteToppings"],
+		mutationFn: async (toppingId: string) => {
+			return await deleteTopping(toppingId).then((res) => res.data);
+		},
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["toppings"] });
+			return;
+		},
+	});
+
+	// Delete Toppings
+	const handleOk = () => {
+		setConfirmLoading(isPending);
+		if (deleteToppingId) {
+			deleteToppingMutate(deleteToppingId._id);
+		}
+		setDeleteToppingId(null);
+		setOpen(false);
+	};
+	const handleCancel = () => {
+		setDeleteToppingId(null);
+		setOpen(false);
+	};
+	const handleDeleteTopping = async (topping: Topping) => {
+		setDeleteToppingId(topping);
+		setOpen(true);
 	};
 
 	// Handle form data
@@ -201,7 +229,7 @@ const Toppings = () => {
 										<Button
 											type="link"
 											onClick={() => {
-												handleDeleteTopping(record._id);
+												handleDeleteTopping(record);
 											}}
 										>
 											<DeleteOutlined />
@@ -266,6 +294,12 @@ const Toppings = () => {
 					</Form>
 				</Drawer>
 			</Space>
+			<Modal title="Delete" open={open} onOk={handleOk} confirmLoading={confirmLoading} onCancel={handleCancel}>
+				<Space direction="vertical">
+					<Typography.Text>Are sure you want to delete this topping ?</Typography.Text>
+					<Typography.Text type="danger">Topping: {deleteToppingId?.name}</Typography.Text>
+				</Space>
+			</Modal>
 		</>
 	);
 };

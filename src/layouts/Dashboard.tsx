@@ -57,9 +57,9 @@ const menuItemsConfig = [
 		label: <NavLink to="/toppings">Toppings</NavLink>,
 	},
 	{
-		key: "/promos",
+		key: "/coupons",
 		icon: <Icon component={GiftIcon} />,
-		label: <NavLink to="/promos">Promos</NavLink>,
+		label: <NavLink to="/coupons">Coupons</NavLink>,
 	},
 ];
 

@@ -1,5 +1,5 @@
 import { AUTH_SERVICE, CATALOG_SERVICE, ORDER_SERVICE } from "../constants";
-import { CreateUserData, Credentials, OrderStatus, Tenant } from "../types";
+import { Coupon, CreateUserData, Credentials, OrderStatus, Tenant } from "../types";
 import { api } from "./client";
 
 /**
@@ -58,3 +58,5 @@ export const getSingle = (orderId: string, queryString: string) =>
 	api.get(`${ORDER_SERVICE}/orders/${orderId}?${queryString}`);
 export const changeStatus = (orderId: string, data: { status: OrderStatus }) =>
 	api.patch(`${ORDER_SERVICE}/orders/change-status/${orderId}`, data);
+export const getCoupons = (queryString: string) => api.get(`${ORDER_SERVICE}/coupons?${queryString}`);
+export const createCoupons = (couponData: Coupon) => api.post(`${ORDER_SERVICE}/coupons`, couponData);

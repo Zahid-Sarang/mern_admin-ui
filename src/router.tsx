@@ -10,6 +10,7 @@ import Products from "./pages/products/Products";
 import Orders from "./pages/orders/Orders";
 import SingleOrder from "./pages/orders/SingleOrder";
 import Toppings from "./pages/toppings/Toppings";
+import Coupons from "./pages/coupons/Coupons";
 
 export const router = createBrowserRouter([
 	{
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
 					{
 						path: "/toppings",
 						element: <Toppings />,
+					},
+					{
+						path: "/coupons",
+						element: <Coupons />,
 					},
 				],
 			},

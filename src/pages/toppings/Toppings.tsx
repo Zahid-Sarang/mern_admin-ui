@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { debounce } from "lodash";
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme, Tag, Modal } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ToppingFilter from "./ToppingFilter";
 import { FiledData, Topping } from "../../types";
 import { createTopping, deleteTopping, getToppings, updateTopping } from "../../http/api";
@@ -11,12 +11,6 @@ import { TOPPING_PER_PAGE } from "../../constants";
 import { useAuthStore } from "../../store";
 import ToppingForm from "./forms/ToppingForm";
 import { makeFormData } from "../products/helpers";
-
-/**
- * name & image
- * price
- * tenantId
- */
 
 const columns = [
 	{
@@ -89,9 +83,7 @@ const Toppings = () => {
 		queryKey: ["toppings", queryParams],
 		queryFn: async () => {
 			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
-			console.log("after fetching", filterParams);
 			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
-			console.log("before converting", queryString);
 			return await getToppings(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,

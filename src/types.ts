@@ -141,3 +141,14 @@ export enum OrderEvents {
 	PAYMENT_STATUS_UPDATE = "PAYMENT_STATUS_UPDATE",
 	ORDER_STATUS_UPDATE = "ORDER_STATUS_UPDATE",
 }
+
+export interface Coupon {
+	id: string;
+	title: string;
+	code: string;
+	validUpto: Date;
+	tenantId: number;
+	discount: number;
+	createdAt: Date;
+	updatedAt: Date;
+}

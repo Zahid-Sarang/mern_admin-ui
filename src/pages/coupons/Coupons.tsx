@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Flex, Form, Space, Typography, Spin, Table, Drawer, theme, Tag, Modal } from "antd";
+import { Breadcrumb, Button, Flex, Form, Space, Typography, Spin, Table, Drawer, theme, Modal } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { format } from "date-fns";
 import { Coupon } from "../../types";
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../store";
 import React from "react";
-import { createCoupons, getCoupons } from "../../http/api";
+import { createCoupon, deleteCoupon, getCoupons } from "../../http/api";
 import CouponFilter from "./CouponFilter";
 import CouponForm from "./form/CouponForm";
 
@@ -52,6 +52,11 @@ const Coupons = () => {
 	const [queryParams, setQueryParams] = React.useState({
 		tenantId: user!.role === "manager" ? user?.tenant?.id : undefined,
 	});
+
+	const [open, setOpen] = React.useState(false);
+	const [confirmLoading, setConfirmLoading] = React.useState(false);
+	const [deleteCouponId, setDeleteCouponId] = React.useState<Coupon | null>(null);
+
 	const queryClient = useQueryClient();
 
 	// Get Coupons
@@ -70,11 +75,10 @@ const Coupons = () => {
 	});
 
 	// create Coupon
-
-	const { mutate: createCoupon } = useMutation({
+	const { mutate: createCouponMutate, isPending: isCreateCouponPendding } = useMutation({
 		mutationKey: ["createCoupon"],
 		mutationFn: async (data: Coupon) => {
-			return await createCoupons(data).then((res) => res.data);
+			return await createCoupon(data).then((res) => res.data);
 		},
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ["coupons"] });
@@ -84,6 +88,35 @@ const Coupons = () => {
 		},
 	});
 
+	// Delete Toppings
+	const { mutate: deleteCouponMutate, isPending } = useMutation({
+		mutationKey: ["deleteToppings"],
+		mutationFn: async (toppingId: string) => {
+			return await deleteCoupon(toppingId).then((res) => res.data);
+		},
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ["coupons"] });
+			return;
+		},
+	});
+
+	const handleOk = () => {
+		setConfirmLoading(isPending);
+		if (deleteCouponId) {
+			deleteCouponMutate(deleteCouponId._id);
+		}
+		setDeleteCouponId(null);
+		setOpen(false);
+	};
+	const handleCancel = () => {
+		setDeleteCouponId(null);
+		setOpen(false);
+	};
+	const handleDeleteCoupon = async (coupon: Coupon) => {
+		setDeleteCouponId(coupon);
+		setOpen(true);
+	};
+
 	// Handle Form Data
 	const onHandleSubmit = async () => {
 		await form.validateFields();
@@ -92,7 +125,7 @@ const Coupons = () => {
 			...form.getFieldsValue(),
 			tenantId: user?.role === "manager" ? user.tenant?.id : form.getFieldValue("tenantId"),
 		};
-		createCoupon(postData);
+		createCouponMutate(postData);
 	};
 
 	return (
@@ -129,7 +162,12 @@ const Coupons = () => {
 							render: (_, record: Coupon) => {
 								return (
 									<Space>
-										<Button type="link" onClick={() => {}}>
+										<Button
+											type="link"
+											onClick={() => {
+												handleDeleteCoupon(record);
+											}}
+										>
 											<DeleteOutlined />
 											Delete
 										</Button>
@@ -163,7 +201,7 @@ const Coupons = () => {
 							>
 								Cancel
 							</Button>
-							<Button type="primary" onClick={onHandleSubmit}>
+							<Button type="primary" onClick={onHandleSubmit} loading={isCreateCouponPendding}>
 								Save
 							</Button>
 						</Space>
@@ -174,6 +212,12 @@ const Coupons = () => {
 					</Form>
 				</Drawer>
 			</Space>
+			<Modal title="Delete" open={open} onOk={handleOk} confirmLoading={confirmLoading} onCancel={handleCancel}>
+				<Space direction="vertical">
+					<Typography.Text>Are sure you want to delete this coupon ?</Typography.Text>
+					<Typography.Text type="danger">Topping: {deleteCouponId?.title}</Typography.Text>
+				</Space>
+			</Modal>
 		</>
 	);
 };

@@ -59,4 +59,5 @@ export const getSingle = (orderId: string, queryString: string) =>
 export const changeStatus = (orderId: string, data: { status: OrderStatus }) =>
 	api.patch(`${ORDER_SERVICE}/orders/change-status/${orderId}`, data);
 export const getCoupons = (queryString: string) => api.get(`${ORDER_SERVICE}/coupons?${queryString}`);
-export const createCoupons = (couponData: Coupon) => api.post(`${ORDER_SERVICE}/coupons`, couponData);
+export const createCoupon = (couponData: Coupon) => api.post(`${ORDER_SERVICE}/coupons`, couponData);
+export const deleteCoupon = (couponId: string) => api.delete(`${ORDER_SERVICE}/coupons/coupon/${couponId}`);

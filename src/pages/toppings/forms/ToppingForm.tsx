@@ -1,4 +1,4 @@
-import { Card, Col, Form, FormInstance, Input, InputNumber, Row, Select, Space } from "antd";
+import { Card, Col, Form, FormInstance, Input, InputNumber, Row, Select, Space, Switch, Typography } from "antd";
 import { useAuthStore } from "../../../store";
 import { useQuery } from "@tanstack/react-query";
 import { getTenants } from "../../../http/api";
@@ -95,6 +95,19 @@ const ToppingForm = ({ form }: { form: FormInstance }) => {
 								</Row>
 							</Card>
 						)}
+
+						<Card title="Other Properties" bordered={false}>
+							<Row gutter={20}>
+								<Col span={24}>
+									<Space>
+										<Form.Item name="isPublish">
+											<Switch defaultChecked={false} onChange={() => {}} checkedChildren="YES" unCheckedChildren="NO" />
+										</Form.Item>
+										<Typography.Text style={{ marginBottom: 22, display: "block" }}>Published</Typography.Text>
+									</Space>
+								</Col>
+							</Row>
+						</Card>
 					</Space>
 				</Col>
 			</Row>

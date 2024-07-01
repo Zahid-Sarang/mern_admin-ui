@@ -1,11 +1,11 @@
-import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme } from "antd";
-import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Flex, Form, Space, Typography, Image, Spin, Table, Drawer, theme, Tag } from "antd";
+import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import ToppingFilter from "./ToppingFilter";
 import { Topping } from "../../types";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTopping, getToppings } from "../../http/api";
-import React from "react";
+import { createTopping, getToppings, updateTopping } from "../../http/api";
+import React, { useEffect } from "react";
 import { TOPPING_PER_PAGE } from "../../constants";
 import { useAuthStore } from "../../store";
 import ToppingForm from "./forms/ToppingForm";
@@ -39,6 +39,14 @@ const columns = [
 			return <Typography.Text>₹{record.price}</Typography.Text>;
 		},
 	},
+	{
+		title: "Status",
+		dataIndex: "isPublish",
+		key: "isPublish",
+		render: (_: boolean, record: Topping) => {
+			return <>{record.isPublish ? <Tag color="green">Published</Tag> : <Tag color="red">Draft</Tag>}</>;
+		},
+	},
 ];
 
 const Toppings = () => {
@@ -48,12 +56,22 @@ const Toppings = () => {
 	} = theme.useToken();
 	const { user } = useAuthStore();
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
+	const [currentTopping, setCurrentTopping] = React.useState<Topping | null>(null);
 
 	const [queryParams, setQueryParams] = React.useState({
 		perPage: TOPPING_PER_PAGE,
 		currentPage: 1,
 		tenantId: user!.role === "manager" ? user?.tenant?.id : undefined,
 	});
+
+	// set Toppings for Edit
+
+	useEffect(() => {
+		if (currentTopping) {
+			setDrawerOpen(true);
+			form.setFieldsValue(currentTopping);
+		}
+	}, [currentTopping, form]);
 
 	// Fetching Toppings Data
 	const {
@@ -79,10 +97,14 @@ const Toppings = () => {
 	const { mutate: toppingMutate, isPending: isCreateToppingsPendding } = useMutation({
 		mutationKey: ["createToppings"],
 		mutationFn: async (data: FormData) => {
-			return await createTopping(data).then((res) => res.data);
+			if (currentTopping) {
+				return await updateTopping(data, currentTopping._id);
+			} else {
+				return await createTopping(data).then((res) => res.data);
+			}
 		},
 		onSuccess: async () => {
-			queryClient.invalidateQueries({ queryKey: ["products"] });
+			queryClient.invalidateQueries({ queryKey: ["toppings"] });
 			form.resetFields();
 			setDrawerOpen(false);
 			return;
@@ -149,6 +171,15 @@ const Toppings = () => {
 										<Button
 											type="link"
 											onClick={() => {
+												setCurrentTopping(record);
+											}}
+										>
+											<EditOutlined />
+											Edit
+										</Button>
+										<Button
+											type="link"
+											onClick={() => {
 												handleDeleteTopping(record._id);
 											}}
 										>
@@ -182,18 +213,22 @@ const Toppings = () => {
 
 				{/* Drawer for create toppings */}
 				<Drawer
-					title="Add Toppings"
+					title={currentTopping ? "Update Toppings" : "Add Toppings"}
 					open={drawerOpen}
 					width={720}
 					styles={{ body: { background: colorBgLayout } }}
 					destroyOnClose={true}
 					onClose={() => {
+						setCurrentTopping(null);
+						form.resetFields();
 						setDrawerOpen(false);
 					}}
 					extra={
 						<Space>
 							<Button
 								onClick={() => {
+									setCurrentTopping(null);
+									form.resetFields();
 									setDrawerOpen(false);
 								}}
 							>

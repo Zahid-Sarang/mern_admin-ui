@@ -98,6 +98,7 @@ export type Topping = {
 	name: string;
 	price: number;
 	image: string;
+	isPublish: boolean;
 };
 
 export interface CartItem extends Pick<Product, "_id" | "name" | "image" | "priceConfiguration"> {

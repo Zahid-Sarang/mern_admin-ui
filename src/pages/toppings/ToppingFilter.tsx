@@ -1,4 +1,4 @@
-import { Card, Col, Form, Input, Row, Select } from "antd";
+import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography } from "antd";
 import React from "react";
 import { useAuthStore } from "../../store";
 import { Tenant } from "../../types";
@@ -44,6 +44,14 @@ const ToppingFilter = ({ children }: ToppingFilterProps) => {
 								</Form.Item>
 							</Col>
 						)}
+						<Col span={6}>
+							<Space>
+								<Form.Item name="isPublish">
+									<Switch defaultChecked={false} onChange={() => {}} />
+								</Form.Item>
+								<Typography.Text style={{ marginBottom: 22, display: "block" }}>published item</Typography.Text>
+							</Space>
+						</Col>
 					</Row>
 				</Col>
 

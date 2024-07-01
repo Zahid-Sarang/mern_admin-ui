@@ -8,10 +8,12 @@ import Logo from "../components/icons/Logo";
 import Home from "../components/icons/Home";
 import UserIcon from "../components/icons/UserIcon";
 import { foodIcon } from "../components/icons/FoodIcon";
+import ToppingIcon from "../components/icons/ToppingIcon";
 import BasketIcon from "../components/icons/BasketIcon";
 import GiftIcon from "../components/icons/GiftIcon";
 import { useMutation } from "@tanstack/react-query";
 import { logout } from "../http/api";
+import CategoryIcon from "../components/icons/CategoryIcon";
 
 const { Sider, Header, Content, Footer } = Layout;
 
@@ -42,6 +44,17 @@ const menuItemsConfig = [
 		key: "/products",
 		icon: <Icon component={foodIcon} />,
 		label: <NavLink to="/products">Products</NavLink>,
+	},
+	{
+		key: "/category",
+		icon: <Icon component={CategoryIcon} />,
+		label: <NavLink to="/products">Category</NavLink>,
+		roles: ["admin"],
+	},
+	{
+		key: "/toppings",
+		icon: <Icon component={ToppingIcon} />,
+		label: <NavLink to="/toppings">Toppings</NavLink>,
 	},
 	{
 		key: "/promos",

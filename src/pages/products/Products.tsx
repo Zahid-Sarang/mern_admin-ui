@@ -107,10 +107,10 @@ const Products = () => {
 		error,
 	} = useQuery({
 		queryKey: ["products", queryParams],
-		queryFn: () => {
+		queryFn: async () => {
 			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
 			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
-			return getProducts(queryString).then((res) => res.data);
+			return await getProducts(queryString).then((res) => res.data);
 		},
 		placeholderData: keepPreviousData,
 	});

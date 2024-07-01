@@ -2,7 +2,9 @@ import { AUTH_SERVICE, CATALOG_SERVICE, ORDER_SERVICE } from "../constants";
 import { CreateUserData, Credentials, OrderStatus, Tenant } from "../types";
 import { api } from "./client";
 
-// Auth Service
+/**
+ * Auth Service Endpoints
+ */
 export const login = (credentials: Credentials) => api.post(`${AUTH_SERVICE}/auth/login`, credentials);
 export const self = () => api.get(`${AUTH_SERVICE}/auth/self`);
 export const logout = () => api.post(`${AUTH_SERVICE}/auth/logout`);
@@ -13,10 +15,13 @@ export const createTenant = (tenants: Tenant) => api.post(`${AUTH_SERVICE}/tenan
 export const updateUser = (user: CreateUserData, id: number) => api.patch(`${AUTH_SERVICE}/users/${id}`, user);
 export const updateTenant = (tenant: Tenant, id: number) => api.patch(`${AUTH_SERVICE}/tenants/${id}`, tenant);
 
-// Catalog Service
+/**
+ * Catalog Service Endpoints
+ */
 export const getCategories = () => api.get(`${CATALOG_SERVICE}/categories`);
 export const getCategory = (categpryId: string) => api.get(`${CATALOG_SERVICE}/categories/${categpryId}`);
 export const getProducts = (queryParam: string) => api.get(`${CATALOG_SERVICE}/products?${queryParam}`);
+export const getToppings = (queryParam: string) => api.get(`${CATALOG_SERVICE}/toppings?${queryParam}`);
 export const createProduct = (product: FormData) =>
 	api.post(`${CATALOG_SERVICE}/products`, product, {
 		headers: {
@@ -30,11 +35,11 @@ export const updateProduct = (product: FormData, productId: string) =>
 		},
 	});
 
-// Order Services
-
+/**
+ * Order Service Endpoints
+ */
 export const getOrders = (queryString: string) => api.get(`${ORDER_SERVICE}/orders?${queryString}`);
 export const getSingle = (orderId: string, queryString: string) =>
 	api.get(`${ORDER_SERVICE}/orders/${orderId}?${queryString}`);
-
 export const changeStatus = (orderId: string, data: { status: OrderStatus }) =>
 	api.patch(`${ORDER_SERVICE}/orders/change-status/${orderId}`, data);

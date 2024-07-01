@@ -9,6 +9,7 @@ import UsersPage from "./pages/users/Users";
 import Products from "./pages/products/Products";
 import Orders from "./pages/orders/Orders";
 import SingleOrder from "./pages/orders/SingleOrder";
+import Toppings from "./pages/toppings/Toppings";
 
 export const router = createBrowserRouter([
 	{
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
 					{
 						path: "/orders/:orderId",
 						element: <SingleOrder />,
+					},
+					{
+						path: "/toppings",
+						element: <Toppings />,
 					},
 				],
 			},

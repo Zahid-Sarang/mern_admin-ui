@@ -4,11 +4,11 @@ import { getCategories, getTenants } from "../../http/api";
 import { Category, Tenant } from "../../types";
 import { useAuthStore } from "../../store";
 
-type ProductsFilerProps = {
+type ProductsFilterProps = {
 	children?: React.ReactNode;
 };
 
-const ProductsFilter = ({ children }: ProductsFilerProps) => {
+const ProductsFilter = ({ children }: ProductsFilterProps) => {
 	const { user } = useAuthStore();
 	const { data: restaurants } = useQuery({
 		queryKey: ["restaurants"],

@@ -1,15 +1,16 @@
-import { Breadcrumb, Flex, Space, Table, Tag, Typography, message } from "antd";
+import React from "react";
 import { Link } from "react-router-dom";
-import { RightOutlined } from "@ant-design/icons";
-import { Order, OrderEvents, PaymentMode, PaymentStatus } from "../../types";
+import { Breadcrumb, Flex, Form, Space, Spin, Table, Tag, Typography, message } from "antd";
+import { format } from "date-fns";
+import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
+import { FiledData, Order, OrderEvents, PaymentMode, PaymentStatus } from "../../types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOrders } from "../../http/api";
-import { format } from "date-fns";
-import { colorMapping } from "../../constants";
+import { ORDER_PER_PAGE, colorMapping } from "../../constants";
 import { capitalizeFirst } from "../products/helpers";
-import React from "react";
 import socket from "../../lib/socket";
 import { useAuthStore } from "../../store";
+import OrderFilterForm from "./form/OrderFilterForm";
 
 const columns = [
 	{
@@ -92,12 +93,17 @@ const columns = [
 	},
 ];
 
-const TENANT_ID = 8;
-
 const Orders = () => {
+	const [form] = Form.useForm();
 	const { user } = useAuthStore();
 	const queryClient = useQueryClient();
 	const [messageApi, contextHolder] = message.useMessage();
+
+	const [queryParams, setQueryParams] = React.useState({
+		perPage: ORDER_PER_PAGE,
+		currentPage: 1,
+		tenantId: user!.role === "manager" ? user?.tenant?.id : undefined,
+	});
 
 	React.useEffect(() => {
 		if (user?.tenant) {
@@ -129,14 +135,40 @@ const Orders = () => {
 		};
 	}, [messageApi, queryClient, user?.tenant]);
 
-	const { data: orders } = useQuery({
-		queryKey: ["orders"],
+	const {
+		data: orders,
+		isFetching,
+		isLoading,
+		isError,
+		error,
+	} = useQuery({
+		queryKey: ["orders", queryParams],
 		queryFn: async () => {
 			// if admin user then make sure to send tenantId , or tenant id from selected filter
-			const queryString = new URLSearchParams({ tenantId: String(TENANT_ID) }).toString();
+			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
+			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
 			return await getOrders(queryString).then((res) => res.data);
 		},
 	});
+
+	const onFilterChange = async (changeFileds: FiledData[]) => {
+		console.log(changeFileds);
+		const changedFilterFields = changeFileds
+			.map((item) => ({
+				[item.name[0]]: item.value,
+			}))
+			.reduce((acc, item) => ({ ...acc, ...item }), {});
+
+		setQueryParams((prev) => ({
+			...prev,
+			...changedFilterFields,
+			currentPage: 1,
+		}));
+	};
+
+	if (isLoading) {
+		return <h1>Loding...</h1>;
+	}
 
 	return (
 		<>
@@ -155,8 +187,36 @@ const Orders = () => {
 							},
 						]}
 					/>
+					{isFetching && <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />}
+					{isError && <Typography.Text type="danger">{error.message}</Typography.Text>}
 				</Flex>
-				<Table columns={columns} rowKey={"_id"} dataSource={orders} />
+				{user?.role === "admin" && (
+					<Form form={form} onFieldsChange={onFilterChange}>
+						<OrderFilterForm />
+					</Form>
+				)}
+
+				<Table
+					columns={columns}
+					rowKey={"_id"}
+					dataSource={orders.data}
+					pagination={{
+						total: orders?.total,
+						pageSize: queryParams.perPage,
+						current: queryParams.currentPage,
+						onChange: (page) => {
+							setQueryParams((prev) => {
+								return {
+									...prev,
+									currentPage: page,
+								};
+							});
+						},
+						showTotal: (total: number, range: number[]) => {
+							return `Showing ${range[0]} - ${range[1]} of ${total} items`;
+						},
+					}}
+				/>
 			</Space>
 		</>
 	);

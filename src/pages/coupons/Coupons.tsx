@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Flex, Form, Space, Typography, Spin, Table, Drawer, theme, Modal } from "antd";
+import { Breadcrumb, Button, Flex, Form, Space, Typography, Spin, Table, Drawer, theme, Modal, Tag } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { format } from "date-fns";
 import { Coupon, FiledData } from "../../types";
@@ -29,6 +29,15 @@ const columns = [
 		key: "discount",
 		render: (_text: string, record: Coupon) => {
 			return <Typography.Text>{record.discount}%</Typography.Text>;
+		},
+	},
+	{
+		title: "Status",
+		render: (_text: string, record: Coupon) => {
+			const currentDate = new Date();
+			const couponDate = new Date(record.validUpto);
+			const isExpired = currentDate <= couponDate;
+			return <>{isExpired ? <Tag color="green">Valid</Tag> : <Tag color="red">Expired</Tag>}</>;
 		},
 	},
 	{

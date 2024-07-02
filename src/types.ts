@@ -143,7 +143,7 @@ export enum OrderEvents {
 }
 
 export interface Coupon {
-	id: string;
+	_id: string;
 	title: string;
 	code: string;
 	validUpto: Date;

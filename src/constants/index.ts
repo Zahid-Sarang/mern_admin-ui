@@ -8,6 +8,7 @@ export const USER_PER_PAGE = 8;
 export const TENANT_PER_PAGE = 6;
 export const PRODUCT_PER_PAGE = 6;
 export const TOPPING_PER_PAGE = 6;
+export const COUPON_PER_PAGE = 6;
 
 export const AUTH_SERVICE = "/api/auth";
 export const CATALOG_SERVICE = "/api/catalog";

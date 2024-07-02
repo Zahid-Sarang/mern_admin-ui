@@ -1,14 +1,16 @@
 import { Breadcrumb, Button, Flex, Form, Space, Typography, Spin, Table, Drawer, theme, Modal } from "antd";
 import { RightOutlined, PlusOutlined, LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { format } from "date-fns";
-import { Coupon } from "../../types";
+import { Coupon, FiledData } from "../../types";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../store";
 import React from "react";
 import { createCoupon, deleteCoupon, getCoupons } from "../../http/api";
 import CouponFilter from "./CouponFilter";
 import CouponForm from "./form/CouponForm";
+import { COUPON_PER_PAGE } from "../../constants";
+import { debounce } from "lodash";
 
 const columns = [
 	{
@@ -50,13 +52,14 @@ const Coupons = () => {
 	const { user } = useAuthStore();
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [queryParams, setQueryParams] = React.useState({
+		perPage: COUPON_PER_PAGE,
+		currentPage: 1,
 		tenantId: user!.role === "manager" ? user?.tenant?.id : undefined,
 	});
 
 	const [open, setOpen] = React.useState(false);
 	const [confirmLoading, setConfirmLoading] = React.useState(false);
 	const [deleteCouponId, setDeleteCouponId] = React.useState<Coupon | null>(null);
-
 	const queryClient = useQueryClient();
 
 	// Get Coupons
@@ -70,9 +73,40 @@ const Coupons = () => {
 		queryFn: async () => {
 			const filterParams = Object.fromEntries(Object.entries(queryParams).filter((item) => !!item[1]));
 			const queryString = new URLSearchParams(filterParams as unknown as Record<string, string>).toString();
-			return await getCoupons(queryString);
+			return await getCoupons(queryString).then((res) => res.data);
 		},
+		placeholderData: keepPreviousData,
 	});
+
+	const debounceQupdate = React.useMemo(() => {
+		return debounce((value: string | undefined) => {
+			setQueryParams((prev) => ({
+				...prev,
+				q: value,
+				currentPage: 1,
+			}));
+		}, 500);
+	}, []);
+
+	// handle Filters
+
+	const onFilterChange = (changeFields: FiledData[]) => {
+		const changedFilterFields = changeFields
+			.map((item) => ({
+				[item.name[0]]: item.value,
+			}))
+			.reduce((acc, item) => ({ ...acc, ...item }), {});
+
+		if ("q" in changedFilterFields) {
+			debounceQupdate(changedFilterFields.q);
+		} else {
+			setQueryParams((prev) => ({
+				...prev,
+				...changedFilterFields,
+				currentPage: 1,
+			}));
+		}
+	};
 
 	// create Coupon
 	const { mutate: createCouponMutate, isPending: isCreateCouponPendding } = useMutation({
@@ -146,7 +180,7 @@ const Coupons = () => {
 					{isFetching && <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />}
 					{isError && <Typography.Text type="danger">{error.message}</Typography.Text>}
 				</Flex>
-				<Form form={filterForm}>
+				<Form form={filterForm} onFieldsChange={onFilterChange}>
 					<CouponFilter>
 						<Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
 							Add Coupon
@@ -178,6 +212,22 @@ const Coupons = () => {
 					]}
 					dataSource={coupons?.data}
 					rowKey={"id"}
+					pagination={{
+						total: coupons?.total,
+						pageSize: queryParams.perPage,
+						current: queryParams.currentPage,
+						onChange: (page) => {
+							setQueryParams((prev) => {
+								return {
+									...prev,
+									currentPage: page,
+								};
+							});
+						},
+						showTotal: (total: number, range: number[]) => {
+							return `Showing ${range[0]} - ${range[1]} of ${total} items`;
+						},
+					}}
 				/>
 
 				{/* Drawer for create toppings */}
